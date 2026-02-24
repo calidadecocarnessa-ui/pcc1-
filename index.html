@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PCC1</title>
+
+  <style>
+    :root{
+      --bg:#f3f4f6; --card:#fff; --text:#111; --border:#d0d7de;
+      --blue:#2563eb; --red:#ef4444; --sky:#0ea5e9; --green:#16a34a; --gray:#64748b;
+      --muted:#6b7280;
+    }
+    body{ margin:0; padding:10px; font-family:Arial, sans-serif; background:var(--bg); color:var(--text); }
+
+    /* Encabezado */
+    .encabezado table{ width:100%; border-collapse:collapse; background:#fff; margin-bottom:10px; }
+    .encabezado td{ border:2px solid #000; padding:8px; vertical-align:middle; }
+    .logo{ width:20%; text-align:center; background:#f3f4f6; }
+    .logo img{ max-width:140px; max-height:70px; object-fit:contain; display:block; margin:0 auto; }
+    .titulo{ width:60%; text-align:center; font-size:13px; line-height:1.2; }
+    .titulo span{ color:#0b3d91; font-weight:700; }
+    .info{ width:20%; text-align:center; background:#cfefff; font-size:12px; line-height:1.25; }
+
+    /* Tabs */
+    .tabs{ display:flex; gap:6px; margin-bottom:10px; }
+    .tab-btn{
+      flex:1; padding:12px; cursor:pointer; font-weight:900;
+      border:none; border-radius:12px;
+      background:#cbd5e1; color:#334155;
+    }
+    .tab-btn.active{ background:var(--blue); color:#fff; }
+    .tab-content{ display:none; }
+    .tab-content.active{ display:block; }
+
+    /* Toolbar */
+    .toolbar{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
+    .toolbar button{
+      padding:10px 12px; border:none; border-radius:12px; cursor:pointer; font-weight:900; color:#fff;
+      background:var(--blue);
+    }
+    .toolbar .sky{ background:var(--sky); }
+    .toolbar .green{ background:var(--green); }
+    .toolbar .red{ background:var(--red); }
+    .toolbar .gray{ background:var(--gray); }
+
+    /* Form */
+    .card-entry{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:12px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .row{ display:flex; flex-direction:column; gap:6px; }
+    label{ font-size:10px; font-weight:900; color:var(--muted); text-transform:uppercase; }
+
+    input, select, textarea{
+      width:100%; box-sizing:border-box;
+      padding:10px; border-radius:12px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-size:14px;
+    }
+    textarea{ resize:vertical; min-height:70px; }
+
+    .switchline{
+      display:flex; align-items:center; gap:10px; margin-top:6px;
+      font-size:12px; color:var(--muted); font-weight:900;
+    }
+    .switchline span{ opacity:.9; }
+
+    /* Tables */
+    .table-container{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      overflow:auto;
+    }
+    table{ width:100%; border-collapse:collapse; }
+    th, td{ border-bottom:1px solid var(--border); padding:10px; text-align:center; font-size:13px; vertical-align:top; }
+    th{ position:sticky; top:0; background:#f8fafc; color:var(--muted); font-weight:900; }
+    td.left{ text-align:left; }
+
+    .mini{
+      border:none; border-radius:10px; padding:8px 10px; cursor:pointer;
+      font-weight:900; color:#fff; background:var(--gray);
+    }
+    .mini.blue{ background:var(--blue); }
+    .mini.red{ background:var(--red); }
+    .mini:disabled{ opacity:.35; cursor:not-allowed; }
+
+    .badge{
+      display:inline-block; padding:4px 10px; border-radius:999px;
+      font-weight:900; font-size:12px;
+      background:#e2e8f0; color:#0f172a;
+    }
+    .badge.ro{ background:#fee2e2; color:#7f1d1d; }
+    .badge.ed{ background:#dcfce7; color:#14532d; }
+
+    /* Print */
+    #print-replica{ display:none; }
+    @media print{
+      .tabs, .toolbar, .card-entry, .table-container { display:none !important; }
+      #print-replica{ display:block !important; }
+      body > .encabezado{ display:none !important; }
+      @page{ size:A4 landscape; margin:0.6cm; }
+      .p-table{ width:100%; border-collapse:collapse; table-layout:fixed; }
+      .p-table th, .p-table td{ border:1px solid #000; padding:4px; font-size:9pt; }
+      .p-table th{ background:#eee; }
+      .p-title{ text-align:center; font-weight:900; margin:8px 0 10px; }
+      .encabezado-print table{ width:100%; border-collapse:collapse; margin-bottom:8px; }
+      .encabezado-print td{ border:2px solid #000; padding:6px; vertical-align:middle; }
+      .encabezado-print .logo{ width:20%; text-align:center; }
+      .encabezado-print .logo img{ max-width:130px; max-height:60px; object-fit:contain; }
+      .encabezado-print .titulo{ width:60%; text-align:center; font-size:12px; }
+      .encabezado-print .info{ width:20%; text-align:center; font-size:11px; background:#cfefff; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ENCABEZADO -->
+  <div class="encabezado">
+    <table>
+      <tr>
+        <td class="logo">
+          <img id="logoImg" src="logo.jpg" alt="Logo">
+        </td>
+        <td class="titulo">
+          <strong>SISTEMA DE GESTIÓN DE CALIDAD</strong><br>
+          INSPECCIÓN DE CARCASAS ANTES DEL LAVADO<br>
+          <span>PCC 1 FAENA</span>
+        </td>
+        <td class="info">
+          RG-HCCP - PCC - 307/1<br>
+          Emisión: 23/02/2026<br>
+          Rev. 12
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="toolbar">
+    <button class="sky" type="button" id="btnHora">⏱️ Hora</button>
+    <button type="button" id="btnPDF">🖨️ PDF</button>
+    <button class="green" type="button" id="btnFinalizar">✅ Finalizar</button>
+    <button class="red" type="button" id="btnBorrar">🗑️ Borrar</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="tab1">REGISTRO</button>
+    <button class="tab-btn" data-tab="tab2">ACCIONES</button>
+    <button class="tab-btn" data-tab="tab3">DÍAS FINALIZADOS</button>
+  </div>
+
+  <!-- TAB 1 -->
+  <div id="tab1" class="tab-content active">
+    <div class="card-entry">
+      <div class="row">
+        <label>GARRÓN</label>
+        <input id="inG" readonly>
+      </div>
+
+      <div class="row">
+        <label>HORA</label>
+        <input type="time" id="inH" step="60">
+        <div class="switchline">
+          <span>Auto hora</span>
+          <input type="checkbox" id="autoHora">
+          <span id="autoTxt">Manual</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>DESVÍO (0/1)</label>
+        <select id="inB">
+          <option value="0">0</option>
+          <option value="1">1</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label>RESP</label>
+        <select id="inR">
+          <option value="">-</option>
+          <option value="MQ">MQ</option>
+          <option value="MD">MD</option>
+          <option value="WC">WC</option>
+          <option value="DE">DE</option>
+          <option value="AA">AA</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>G</th>
+            <th>Hora</th>
+            <th>0/1</th>
+            <th>Resp</th>
+            <th style="width:170px;">Editar</th>
+          </tr>
+        </thead>
+        <tbody id="tbReg"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 2 -->
+  <div id="tab2" class="tab-content">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Garrón / Lado / Ubicación</th>
+            <th style="width:90px;">Hora</th>
+            <th>Acción correctiva</th>
+            <th style="width:110px;">Hora cor.</th>
+            <th>Restablecimiento</th>
+            <th>Preventiva</th>
+            <th style="width:140px;">Encargado</th>
+          </tr>
+        </thead>
+        <tbody id="tbAcc"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 3 -->
+  <div id="tab3" class="tab-content">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:150px;">Fecha</th>
+            <th style="width:110px;">Registros</th>
+            <th style="width:140px;">Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tbFinal"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="print-replica"></div>
+
+<script>
+  // ====== STORAGE ======
+  const LS_DAY = "pcc1_day_v1";
+  const LS_FINAL = "pcc1_final_v1";
+  const LS_AUTO = "pcc1_auto_v1";
+
+  let data = [];
+  let finalizados = [];
+
+  // ====== DOM ======
+  const elLogo = document.getElementById("logoImg");
+  const btnHora = document.getElementById("btnHora");
+  const btnPDF = document.getElementById("btnPDF");
+  const btnFinalizar = document.getElementById("btnFinalizar");
+  const btnBorrar = document.getElementById("btnBorrar");
+
+  const inG = document.getElementById("inG");
+  const inH = document.getElementById("inH");
+  const inB = document.getElementById("inB");
+  const inR = document.getElementById("inR");
+
+  const autoHora = document.getElementById("autoHora");
+  const autoTxt = document.getElementById("autoTxt");
+
+  const tbReg = document.getElementById("tbReg");
+  const tbAcc = document.getElementById("tbAcc");
+  const tbFinal = document.getElementById("tbFinal");
+
+  // ====== LOGO fallback ======
+  (function(){
+    if(!elLogo) return;
+    const candidates = ["logo.jpg","logo.jpeg","logo.png","logo.jpg.jpeg"];
+    let i=0;
+    elLogo.onerror = () => {
+      i++;
+      if(i < candidates.length) elLogo.src = candidates[i];
+      else { elLogo.style.display="none"; elLogo.parentNode.innerHTML="<b>LOGO</b>"; }
+    };
+    elLogo.src = candidates[0];
+  })();
+
+  // ====== HELPERS ======
+  function esc(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
+  }
+  function escAttr(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;");
+  }
+
+  function nowHHMM(){
+    const d = new Date();
+    return String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+  }
+
+  function capTime(){ inH.value = nowHHMM(); }
+
+  function isAutoOn(){ return !!autoHora.checked; }
+
+  function setAutoUI(){
+    autoTxt.textContent = isAutoOn() ? "Auto" : "Manual";
+
+    // Hora manual bloqueada cuando Auto
+    inH.disabled = isAutoOn();
+
+    // Acciones bloqueadas cuando Auto
+    tbAcc.querySelectorAll("input,select,textarea").forEach(el => el.disabled = isAutoOn());
+  }
+
+  function updateGarron(){
+    inG.value = data.length + 1;
+  }
+
+  function loadAll(){
+    try{
+      data = JSON.parse(localStorage.getItem(LS_DAY) || "[]");
+      if(!Array.isArray(data)) data = [];
+    }catch{ data = []; }
+
+    try{
+      finalizados = JSON.parse(localStorage.getItem(LS_FINAL) || "[]");
+      if(!Array.isArray(finalizados)) finalizados = [];
+    }catch{ finalizados = []; }
+
+    const savedAuto = localStorage.getItem(LS_AUTO) === "1";
+    autoHora.checked = savedAuto;
+    setAutoUI();
+  }
+
+  function saveDay(){ localStorage.setItem(LS_DAY, JSON.stringify(data)); }
+  function saveFinal(){ localStorage.setItem(LS_FINAL, JSON.stringify(finalizados)); }
+
+  // ====== TABS ======
+  document.querySelectorAll(".tab-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(t=>t.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById(btn.dataset.tab).classList.add("active");
+      if(btn.dataset.tab === "tab3") renderFinalizados();
+    });
+  });
+
+  // ====== EVENTS ======
+  btnHora.addEventListener("click", capTime);
+
+  autoHora.addEventListener("change", ()=>{
+    localStorage.setItem(LS_AUTO, autoHora.checked ? "1" : "0");
+    setAutoUI();
+    renderRegistro(); // para que botones queden deshabilitados
+  });
+
+  btnBorrar.addEventListener("click", ()=>{
+    if(!confirm("¿Borrar todo el día actual en este dispositivo?")) return;
+    data = [];
+    saveDay();
+    updateGarron();
+    renderAll();
+  });
+
+  btnFinalizar.addEventListener("click", finalizarDia);
+
+  btnPDF.addEventListener("click", imprimirTodo);
+
+  inR.addEventListener("change", ()=>{
+    const resp = (inR.value || "").trim().toUpperCase();
+    if(!resp) return;
+
+    // auto hora = toma hora del dispositivo al guardar
+    if(isAutoOn()) capTime();
+
+    data.push({
+      g: data.length + 1,
+      h: inH.value || "",
+      b: inB.value || "0",
+      r: resp,
+
+      lado:"",
+      ubicacion:"",
+      accionCorrectiva:"",
+      horaCorreccion:"",
+      restablecimiento:"",
+      preventiva:"",
+      encargado:""
+    });
+
+    inR.value = "";
+    saveDay();
+    updateGarron();
+    renderAll();
+
+    if(isAutoOn()) capTime();
+  });
+
+  // ====== EDIT / DELETE ROW ======
+  function editRow(idx){
+    if(isAutoOn()) return;
+    const cur = String(data[idx].g ?? "");
+    const nuevo = prompt("Editar garrón:", cur);
+    if(nuevo === null) return;
+    const n = Number(nuevo);
+    if(!Number.isFinite(n) || n <= 0){ alert("Número inválido"); return; }
+    data[idx].g = n;
+    saveDay();
+    renderAll();
+  }
+
+  function deleteRow(idx){
+    if(isAutoOn()) return;
+    if(!confirm("¿Borrar esta fila?")) return;
+    data.splice(idx,1);
+    saveDay();
+    updateGarron();
+    renderAll();
+  }
+
+  // ====== RENDER ======
+  function renderRegistro(){
+    tbReg.innerHTML = data.map((d,idx)=>`
+      <tr>
+        <td>${esc(d.g)}</td>
+        <td>${esc(d.h)}</td>
+        <td>${esc(d.b)}</td>
+        <td>${esc(d.r)}</td>
+        <td>
+          <button class="mini blue" onclick="editRow(${idx})" ${isAutoOn() ? "disabled" : ""}>✏️</button>
+          <button class="mini red" onclick="deleteRow(${idx})" ${isAutoOn() ? "disabled" : ""}>🗑️</button>
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  function saveField(idx, field, value){
+    data[idx][field] = value;
+    saveDay();
+  }
+
+  function renderAcciones(){
+    const devs = data.map((d,idx)=>({d,idx})).filter(x=>x.d.b==="1");
+
+    tbAcc.innerHTML = devs.map(x=>{
+      const d = x.d, idx = x.idx;
+      return `
+        <tr>
+          <td class="left">
+            <div><b>Garrón ${esc(d.g)}</b></div>
+            <div style="margin-top:8px; display:grid; gap:6px;">
+              <select onchange="saveField(${idx},'lado',this.value)" ${isAutoOn() ? "disabled" : ""}>
+                <option value="">Lado</option>
+                <option value="Izquierdo" ${d.lado==="Izquierdo"?"selected":""}>Izquierdo</option>
+                <option value="Derecho" ${d.lado==="Derecho"?"selected":""}>Derecho</option>
+              </select>
+
+              <select onchange="saveField(${idx},'ubicacion',this.value)" ${isAutoOn() ? "disabled" : ""}>
+                <option value="">Ubicación</option>
+                <option value="Garrón" ${d.ubicacion==="Garrón"?"selected":""}>Garrón</option>
+                <option value="Culata" ${d.ubicacion==="Culata"?"selected":""}>Culata</option>
+                <option value="Nalga - Bola de lomo" ${d.ubicacion==="Nalga - Bola de lomo"?"selected":""}>Nalga - Bola de lomo</option>
+                <option value="Bifes - Cuadril" ${d.ubicacion==="Bifes - Cuadril"?"selected":""}>Bifes - Cuadril</option>
+                <option value="Pecho - Matambre - Ijada" ${d.ubicacion==="Pecho - Matambre - Ijada"?"selected":""}>Pecho - Matambre - Ijada</option>
+                <option value="Lomo - Costillas" ${d.ubicacion==="Lomo - Costillas"?"selected":""}>Lomo - Costillas</option>
+                <option value="Brazuelo - Cogote" ${d.ubicacion==="Brazuelo - Cogote"?"selected":""}>Brazuelo - Cogote</option>
+                <option value="Marucha - Paleta" ${d.ubicacion==="Marucha - Paleta"?"selected":""}>Marucha - Paleta</option>
+                <option value="Vacío - Entraña" ${d.ubicacion==="Vacío - Entraña"?"selected":""}>Vacío - Entraña</option>
+              </select>
+            </div>
+          </td>
+
+          <td>${esc(d.h || "")}</td>
+
+          <td>
+            <textarea ${isAutoOn() ? "disabled" : ""} oninput="saveField(${idx},'accionCorrectiva',this.value)">${esc(d.accionCorrectiva)}</textarea>
+          </td>
+
+          <td>
+            <input type="time" step="60" ${isAutoOn() ? "disabled" : ""} value="${escAttr(d.horaCorreccion)}"
+              onchange="saveField(${idx},'horaCorreccion',this.value)">
+          </td>
+
+          <td>
+            <textarea ${isAutoOn() ? "disabled" : ""} oninput="saveField(${idx},'restablecimiento',this.value)">${esc(d.restablecimiento)}</textarea>
+          </td>
+
+          <td>
+            <textarea ${isAutoOn() ? "disabled" : ""} oninput="saveField(${idx},'preventiva',this.value)">${esc(d.preventiva)}</textarea>
+          </td>
+
+          <td>
+            <input ${isAutoOn() ? "disabled" : ""} value="${escAttr(d.encargado)}" oninput="saveField(${idx},'encargado',this.value)">
+          </td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  function renderFinalizados(){
+    if(!finalizados.length){
+      tbFinal.innerHTML = `<tr><td colspan="4" style="text-align:left; color:#64748b;">Sin días finalizados.</td></tr>`;
+      return;
+    }
+
+    tbFinal.innerHTML = finalizados.map((d,i)=>{
+      const estado = d.readOnly
+        ? `<span class="badge ro">Solo lectura</span>`
+        : `<span class="badge ed">Editable</span>`;
+
+      const btnCargar = d.readOnly
+        ? `<button class="mini" disabled>Editar</button>`
+        : `<button class="mini blue" onclick="cargarDia(${i})">Editar</button>`;
+
+      return `
+        <tr>
+          <td><b>${esc(d.fecha)}</b></td>
+          <td>${(d.datos||[]).length}</td>
+          <td>${estado}</td>
+          <td class="left">
+            ${btnCargar}
+            <button class="mini" onclick="pdfDia(${i})">PDF</button>
+            <button class="mini" onclick="toggleRO(${i})">${d.readOnly ? "Editable" : "Solo lectura"}</button>
+            <button class="mini red" onclick="borrarDia(${i})">Borrar</button>
+          </td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  function renderAll(){
+    setAutoUI();
+    renderRegistro();
+    renderAcciones();
+  }
+
+  // ====== FINALIZAR + HISTORIAL ======
+  function finalizeDateISO(){
+    return new Date().toISOString().slice(0,10);
+  }
+
+  function finalizarDia(){
+    if(!data.length){ alert("No hay registros."); return; }
+
+    const fecha = finalizeDateISO();
+    const readOnly = isAutoOn(); // si auto hora está ON, guardamos como solo lectura
+
+    const snap = {
+      fecha,
+      readOnly,
+      savedAt: new Date().toISOString(),
+      datos: JSON.parse(JSON.stringify(data))
+    };
+
+    finalizados = finalizados.filter(x=>x.fecha !== fecha);
+    finalizados.unshift(snap);
+    saveFinal();
+
+    alert("Día guardado ✅");
+    renderFinalizados();
+  }
+
+  function cargarDia(i){
+    if(!finalizados[i]) return;
+    if(finalizados[i].readOnly){ alert("Solo lectura."); return; }
+    data = JSON.parse(JSON.stringify(finalizados[i].datos || []));
+    saveDay();
+    updateGarron();
+    renderAll();
+
+    // volver a Registro
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(t=>t.classList.remove("active"));
+    document.querySelector('.tab-btn[data-tab="tab1"]').classList.add("active");
+    document.getElementById("tab1").classList.add("active");
+  }
+
+  function borrarDia(i){
+    if(!finalizados[i]) return;
+    if(!confirm("¿Borrar día finalizado?")) return;
+    finalizados.splice(i,1);
+    saveFinal();
+    renderFinalizados();
+  }
+
+  function toggleRO(i){
+    if(!finalizados[i]) return;
+    finalizados[i].readOnly = !finalizados[i].readOnly;
+    saveFinal();
+    renderFinalizados();
+  }
+
+  function pdfDia(i){
+    if(!finalizados[i]) return;
+    const prev = data;
+    data = JSON.parse(JSON.stringify(finalizados[i].datos || []));
+    imprimirTodo();
+    data = prev;
+  }
+
+  // ====== PRINT ======
+  function headerPrintHTML(){
+    return `
+      <div class="encabezado-print">
+        <table>
+          <tr>
+            <td class="logo"><img src="logo.jpg" onerror="this.onerror=null;this.src='logo.jpg.jpeg';" alt="Logo"></td>
+            <td class="titulo"><strong>SISTEMA DE GESTIÓN DE CALIDAD</strong><br>INSPECCIÓN DE CARCASAS ANTES DEL LAVADO<br><span style="font-weight:900; color:#0b3d91;">PCC 1 FAENA</span></td>
+            <td class="info">RG-HCCP - PCC - 307/1<br>Emisión: 23/02/2026<br>Rev. 12</td>
+          </tr>
+        </table>
+      </div>
+    `;
+  }
+
+  function imprimirTodo(){
+    const fecha = new Date().toLocaleDateString("es-AR");
+    let html = `<div class="print-page">`;
+
+    html += headerPrintHTML();
+    html += `<div class="p-title">REGISTRO PCC 1 - ${esc(fecha)}</div>`;
+    html += `
+      <table class="p-table">
+        <thead>
+          <tr><th>Garrón</th><th>Hora</th><th>0/1</th><th>Resp</th></tr>
+        </thead>
+        <tbody>
+          ${data.map(d=>`
+            <tr>
+              <td>${esc(d.g)}</td>
+              <td>${esc(d.h)}</td>
+              <td>${esc(d.b)}</td>
+              <td>${esc(d.r)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+
+    const devs = data.filter(d=>d.b==="1");
+    html += headerPrintHTML();
+    html += `<div class="p-title">ACCIONES</div>`;
+    html += `
+      <table class="p-table">
+        <thead>
+          <tr>
+            <th>Garrón</th><th>Lado</th><th>Ubicación</th><th>Hora</th>
+            <th>Acción correctiva</th><th>Hora cor.</th><th>Restablecimiento</th><th>Preventiva</th><th>Encargado</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${devs.map(d=>`
+            <tr>
+              <td>${esc(d.g)}</td>
+              <td>${esc(d.lado)}</td>
+              <td>${esc(d.ubicacion)}</td>
+              <td>${esc(d.h)}</td>
+              <td>${esc(d.accionCorrectiva)}</td>
+              <td>${esc(d.horaCorreccion)}</td>
+              <td>${esc(d.restablecimiento)}</td>
+              <td>${esc(d.preventiva)}</td>
+              <td>${esc(d.encargado)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+
+    html += `</div>`;
+    document.getElementById("print-replica").innerHTML = html;
+    setTimeout(()=>window.print(), 200);
+  }
+
+  // ====== INIT ======
+  loadAll();
+  capTime();
+  updateGarron();
+  renderAll();
+  renderFinalizados();
+</script>
+
+</body>
+</html>
