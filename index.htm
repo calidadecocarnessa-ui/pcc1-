@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PCC1 - Inspección de Carcasas</title>
+
+  <style>
+    :root{
+      --bg:#f3f4f6; --card:#fff; --text:#111; --border:#d0d7de;
+      --blue:#2563eb; --red:#ef4444; --sky:#0ea5e9; --green:#16a34a; --gray:#64748b;
+      --muted:#6b7280;
+    }
+    body{ margin:0; padding:10px; font-family:Arial, sans-serif; background:var(--bg); color:var(--text); }
+
+    .encabezado table{ width:100%; border-collapse:collapse; background:#fff; margin-bottom:10px; }
+    .encabezado td{ border:2px solid #000; padding:8px; vertical-align:middle; }
+    .logo{ width:20%; text-align:center; background:#f3f6ff; }
+    .logo img{ max-width:140px; max-height:70px; object-fit:contain; display:block; margin:0 auto; }
+    .titulo{ width:60%; text-align:center; font-size:13px; line-height:1.2; }
+    .titulo span{ color:#0b3d91; font-weight:700; }
+    .info{ width:20%; text-align:center; background:#cfefff; font-size:12px; line-height:1.25; }
+
+    .tabs{ display:flex; gap:6px; margin-bottom:10px; }
+    .tab-btn{
+      flex:1; padding:12px; cursor:pointer; font-weight:900;
+      border:none; border-radius:12px;
+      background:#cbd5e1; color:#334155;
+    }
+    .tab-btn.active{ background:var(--blue); color:#fff; }
+    .tab-content{ display:none; }
+    .tab-content.active{ display:block; }
+
+    .toolbar{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
+    .toolbar button{
+      padding:10px 12px; border:none; border-radius:12px; cursor:pointer; font-weight:900; color:#fff;
+      background:var(--blue);
+    }
+    .toolbar .sky{ background:var(--sky); }
+    .toolbar .green{ background:var(--green); }
+    .toolbar .red{ background:var(--red); }
+    .toolbar .gray{ background:var(--gray); }
+
+    .card-entry{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:12px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .row{ display:flex; flex-direction:column; gap:6px; }
+    label{ font-size:10px; font-weight:900; color:var(--muted); text-transform:uppercase; }
+
+    input, select, textarea{
+      width:100%; box-sizing:border-box;
+      padding:10px; border-radius:12px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-size:14px;
+    }
+    textarea{ resize:vertical; min-height:70px; }
+
+    .switchline{
+      display:flex; align-items:center; gap:10px; margin-top:6px;
+      font-size:12px; color:var(--muted); font-weight:900;
+    }
+
+    .table-container{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      overflow:auto;
+    }
+    table{ width:100%; border-collapse:collapse; }
+    th, td{ border-bottom:1px solid var(--border); padding:10px; text-align:center; font-size:13px; vertical-align:top; }
+    th{ position:sticky; top:0; background:#f8fafc; color:var(--muted); font-weight:900; }
+
+    td.left{ text-align:left; }
+    .mini{
+      border:none; border-radius:10px; padding:8px 10px; cursor:pointer;
+      font-weight:900; color:#fff; background:var(--gray);
+    }
+    .mini.red{ background:var(--red); }
+    .mini:disabled{ opacity:.35; cursor:not-allowed; }
+
+    .badge{
+      display:inline-block; padding:4px 10px; border-radius:999px;
+      font-weight:900; font-size:12px;
+      background:#e2e8f0; color:#0f172a;
+    }
+    .badge.lock{ background:#fee2e2; color:#7f1d1d; }
+    .badge.edit{ background:#dcfce7; color:#14532d; }
+
+    .cell-inp{ padding:6px 8px; border-radius:10px; border:1px solid var(--border); font-size:13px; }
+    .cell-sel{ padding:6px 8px; border-radius:10px; border:1px solid var(--border); font-size:13px; background:#fff; }
+
+    #print-replica{ display:none; }
+    @media print{
+      .tabs, .toolbar, .card-entry, .table-container { display:none !important; }
+      #print-replica{ display:block !important; }
+      body > .encabezado{ display:none !important; }
+
+      @page{ size:A4 landscape; margin:0.6cm; }
+
+      .p-table{ width:100%; border-collapse:collapse; table-layout:fixed; }
+      .p-table th, .p-table td{ border:1px solid #000; padding:4px; font-size:9pt; vertical-align:top; }
+      .p-table th{ background:#eee; }
+      .p-title{ text-align:center; font-weight:900; margin:8px 0 10px; }
+
+      .encabezado-print table{ width:100%; border-collapse:collapse; margin-bottom:8px; }
+      .encabezado-print td{ border:2px solid #000; padding:6px; vertical-align:middle; }
+      .encabezado-print .logo{ width:20%; text-align:center; }
+      .encabezado-print .logo img{ max-width:130px; max-height:60px; object-fit:contain; }
+      .encabezado-print .titulo{ width:60%; text-align:center; font-size:12px; }
+      .encabezado-print .info{ width:20%; text-align:center; font-size:11px; background:#cfefff; }
+
+      .p-firmas{
+        margin-top:14px;
+        display:flex;
+        gap:20px;
+        justify-content:space-between;
+        align-items:flex-end;
+        font-size:10pt;
+      }
+      .p-firma-box{
+        width:48%;
+        border:1px solid #000;
+        padding:10px;
+      }
+      .p-line{
+        border-bottom:1px solid #000;
+        height:18px;
+        margin:12px 0 6px;
+      }
+      .p-small{ font-size:9pt; }
+      .p-right{ text-align:right; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="encabezado">
+    <table>
+      <tr>
+        <td class="logo"><img id="logoImg" src="logo.jpg" alt="Logo"></td>
+        <td class="titulo">
+          <strong>SISTEMA DE GESTIÓN DE CALIDAD</strong><br>
+          INSPECCIÓN DE CARCASAS ANTES DEL LAVADO<br>
+          <span>PCC 1 FAENA</span>
+        </td>
+        <td class="info">
+          RG-HCCP - PCC - 307/1<br>
+          Emisión: 23/02/2026<br>
+          Rev. 12
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="toolbar">
+    <button class="sky" type="button" id="btnHora">⏱️ Hora</button>
+    <button type="button" id="btnPDF">🖨️ PDF</button>
+    <button class="green" type="button" id="btnFinalizar">✅ Finalizar día</button>
+    <button class="red" type="button" id="btnBorrar">🗑️ Borrar día</button>
+  </div>
+
+  <div class="card-entry">
+    <div class="row">
+      <label>GARRÓN</label>
+      <input id="inG" readonly>
+    </div>
+
+    <div class="row">
+      <label>HORA</label>
+      <input type="time" id="inH" step="60">
+      <div class="switchline">
+        <span>Bloqueo</span>
+        <input type="checkbox" id="lockMode">
+        <span id="lockTxt">Editable</span>
+        <span id="lockBadge" class="badge edit">EDITABLE</span>
+      </div>
+    </div>
+
+    <div class="row">
+      <label>DESVÍO (0/1)</label>
+      <select id="inB">
+        <option value="0">0</option>
+        <option value="1">1</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label>RESP</label>
+      <select id="inR">
+        <option value="">-</option>
+        <option value="MQ">MQ</option>
+        <option value="MD">MD</option>
+        <option value="WC">WC</option>
+        <option value="DE">DE</option>
+        <option value="AA">AA</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="tab1">REGISTRO</button>
+    <button class="tab-btn" data-tab="tab2">ACCIONES</button>
+    <button class="tab-btn" data-tab="tab3">DÍAS FINALIZADOS</button>
+  </div>
+
+  <!-- TAB 1 -->
+  <div id="tab1" class="tab-content active">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Garrón</th>
+            <th>Hora</th>
+            <th>0/1</th>
+            <th>Resp</th>
+            <th style="width:110px;">Borrar</th>
+          </tr>
+        </thead>
+        <tbody id="tbReg"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 2 -->
+  <div id="tab2" class="tab-content">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Garrón / Lado / Ubicación</th>
+            <th style="width:90px;">Hora</th>
+
+            <!-- ✅ NUEVO: fecha + descripción (primero) -->
+            <th style="width:130px;">Fecha</th>
+            <th>Descripción del desvío</th>
+
+            <th>No conformidad</th>
+            <th>Acción correctiva</th>
+            <th>Acción preventiva</th>
+            <th style="width:140px;">Encargado</th>
+          </tr>
+        </thead>
+        <tbody id="tbAcc"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 3 -->
+  <div id="tab3" class="tab-content">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:150px;">Fecha</th>
+            <th style="width:110px;">Registros</th>
+            <th style="width:160px;">Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tbFinal"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="print-replica"></div>
+
+<script>
+  // Storage
+  const LS_DAY   = "pcc1_day_v6";
+  const LS_FINAL = "pcc1_final_v6";
+  const LS_LOCK  = "pcc1_lock_v6";
+
+  var data = [];
+  var finalizados = [];
+
+  // Elements
+  var elLogo = document.getElementById("logoImg");
+  var btnHora = document.getElementById("btnHora");
+  var btnPDF = document.getElementById("btnPDF");
+  var btnFinalizar = document.getElementById("btnFinalizar");
+  var btnBorrar = document.getElementById("btnBorrar");
+
+  var inG = document.getElementById("inG");
+  var inH = document.getElementById("inH");
+  var inB = document.getElementById("inB");
+  var inR = document.getElementById("inR");
+
+  var lockMode = document.getElementById("lockMode");
+  var lockTxt = document.getElementById("lockTxt");
+  var lockBadge = document.getElementById("lockBadge");
+
+  var tbReg = document.getElementById("tbReg");
+  var tbAcc = document.getElementById("tbAcc");
+  var tbFinal = document.getElementById("tbFinal");
+
+  // Logo fallback
+  (function(){
+    if(!elLogo) return;
+    var candidates = ["logo.jpg","logo.jpeg","logo.png","logo.jpg.jpeg","LOGO.jpg","LOGO.JPG","Logo.jpg"];
+    var i=0;
+    elLogo.onerror = function(){
+      i++;
+      if(i < candidates.length) elLogo.src = candidates[i];
+      else { elLogo.style.display="none"; elLogo.parentNode.innerHTML="<b>LOGO</b>"; }
+    };
+    elLogo.src = candidates[0];
+  })();
+
+  function esc(s){
+    s = String(s == null ? "" : s);
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+  function escAttr(s){
+    s = String(s == null ? "" : s);
+    return s.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  function nowHHMM(){
+    var d = new Date();
+    var hh = String(d.getHours()); if(hh.length<2) hh="0"+hh;
+    var mm = String(d.getMinutes()); if(mm.length<2) mm="0"+mm;
+    return hh + ":" + mm;
+  }
+  function todayISO(){
+    return new Date().toISOString().slice(0,10);
+  }
+  function capTime(){ inH.value = nowHHMM(); }
+
+  function isLocked(){ return !!lockMode.checked; }
+
+  function setLockUI(){
+    lockTxt.textContent = isLocked() ? "Bloqueado" : "Editable";
+    lockBadge.textContent = isLocked() ? "BLOQUEADO" : "EDITABLE";
+    lockBadge.className = "badge " + (isLocked() ? "lock" : "edit");
+    // En bloqueo: no editar hora del alta (se toma del dispositivo)
+    inH.disabled = isLocked();
+  }
+
+  function updateGarron(){
+    inG.value = data.length + 1;
+  }
+
+  function loadAll(){
+    try{
+      data = JSON.parse(localStorage.getItem(LS_DAY) || "[]");
+      if(!Array.isArray(data)) data = [];
+    }catch(e){ data = []; }
+
+    try{
+      finalizados = JSON.parse(localStorage.getItem(LS_FINAL) || "[]");
+      if(!Array.isArray(finalizados)) finalizados = [];
+    }catch(e){ finalizados = []; }
+
+    lockMode.checked = (localStorage.getItem(LS_LOCK) === "1");
+    setLockUI();
+  }
+
+  function saveDay(){ localStorage.setItem(LS_DAY, JSON.stringify(data)); }
+  function saveFinal(){ localStorage.setItem(LS_FINAL, JSON.stringify(finalizados)); }
+
+  // Tabs
+  var tabBtns = document.querySelectorAll(".tab-btn");
+  for(var i=0;i<tabBtns.length;i++){
+    tabBtns[i].addEventListener("click", function(){
+      for(var j=0;j<tabBtns.length;j++) tabBtns[j].classList.remove("active");
+      var tabs = document.querySelectorAll(".tab-content");
+      for(var k=0;k<tabs.length;k++) tabs[k].classList.remove("active");
+
+      this.classList.add("active");
+      var id = this.getAttribute("data-tab");
+      document.getElementById(id).classList.add("active");
+      if(id === "tab3") renderFinalizados();
+    });
+  }
+
+  btnHora.addEventListener("click", capTime);
+  btnPDF.addEventListener("click", imprimirTodo);
+  btnFinalizar.addEventListener("click", finalizarDia);
+
+  lockMode.addEventListener("change", function(){
+    localStorage.setItem(LS_LOCK, lockMode.checked ? "1" : "0");
+    setLockUI();
+    renderAll();
+  });
+
+  btnBorrar.addEventListener("click", function(){
+    if(!confirm("¿Borrar todo el día actual en este dispositivo?")) return;
+    data = [];
+    saveDay();
+    updateGarron();
+    renderAll();
+  });
+
+  // Alta por resp
+  inR.addEventListener("change", function(){
+    var resp = (inR.value || "").trim().toUpperCase();
+    if(!resp) return;
+
+    if(isLocked()) capTime(); // en bloqueo toma hora del dispositivo
+
+    data.push({
+      g: data.length + 1,
+      h: inH.value || "",
+      b: inB.value || "0",
+      r: resp,
+
+      // Acciones (solo si b=1)
+      lado:"",
+      ubicacion:"",
+      fechaDesvio:"",
+      descDesvio:"",
+      nc:"",
+      ac:"",
+      ap:"",
+      enc:""
+    });
+
+    inR.value = "";
+    saveDay();
+    updateGarron();
+    renderAll();
+    if(isLocked()) capTime();
+  });
+
+  // Editar fila completa (solo si NO está bloqueado)
+  window.updRow = function(idx, field, value){
+    if(isLocked()) return;
+
+    if(field === "g"){
+      var n = Number(value);
+      if(!isFinite(n) || n <= 0) return;
+      data[idx].g = n;
+    } else if(field === "b"){
+      if(value !== "0" && value !== "1") return;
+      data[idx].b = value;
+    } else if(field === "r"){
+      data[idx].r = String(value || "").trim().toUpperCase();
+    } else if(field === "h"){
+      data[idx].h = value || "";
+    }
+    saveDay();
+    renderAcciones();
+  };
+
+  window.deleteRow = function(idx){
+    if(isLocked()) return;
+    if(!confirm("¿Borrar esta fila?")) return;
+    data.splice(idx,1);
+    saveDay();
+    updateGarron();
+    renderAll();
+  };
+
+  // Guardar campos de acciones (siempre editable)
+  window.saveField = function(idx, field, value){
+    data[idx][field] = value;
+    saveDay();
+  };
+
+  function renderRegistro(){
+    var locked = isLocked();
+
+    tbReg.innerHTML = data.map(function(d,idx){
+      if(locked){
+        return ''
+        + '<tr>'
+        + '<td>'+esc(d.g)+'</td>'
+        + '<td>'+esc(d.h)+'</td>'
+        + '<td>'+esc(d.b)+'</td>'
+        + '<td>'+esc(d.r)+'</td>'
+        + '<td><button class="mini red" disabled>🗑️</button></td>'
+        + '</tr>';
+      }
+
+      return ''
+      + '<tr>'
+      + '<td><input class="cell-inp" inputmode="numeric" value="'+escAttr(d.g)+'" oninput="updRow('+idx+',\'g\',this.value)"></td>'
+      + '<td><input class="cell-inp" type="time" step="60" value="'+escAttr(d.h)+'" onchange="updRow('+idx+',\'h\',this.value)"></td>'
+      + '<td>'
+      + '  <select class="cell-sel" onchange="updRow('+idx+',\'b\',this.value)">'
+      + '    <option value="0" '+(d.b==="0"?"selected":"")+'>0</option>'
+      + '    <option value="1" '+(d.b==="1"?"selected":"")+'>1</option>'
+      + '  </select>'
+      + '</td>'
+      + '<td>'
+      + '  <select class="cell-sel" onchange="updRow('+idx+',\'r\',this.value)">'
+      + '    <option value="" '+(!d.r?"selected":"")+'>-</option>'
+      + '    <option value="MQ" '+(d.r==="MQ"?"selected":"")+'>MQ</option>'
+      + '    <option value="MD" '+(d.r==="MD"?"selected":"")+'>MD</option>'
+      + '    <option value="WC" '+(d.r==="WC"?"selected":"")+'>WC</option>'
+      + '    <option value="DE" '+(d.r==="DE"?"selected":"")+'>DE</option>'
+      + '    <option value="AA" '+(d.r==="AA"?"selected":"")+'>AA</option>'
+      + '  </select>'
+      + '</td>'
+      + '<td><button class="mini red" onclick="deleteRow('+idx+')">🗑️</button></td>'
+      + '</tr>';
+    }).join("");
+  }
+
+  function renderAcciones(){
+    var devs = [];
+    for(var i=0;i<data.length;i++){
+      if(data[i].b === "1") devs.push({d:data[i], idx:i});
+    }
+
+    if(devs.length === 0){
+      tbAcc.innerHTML = '<tr><td colspan="8" style="text-align:left;color:#64748b;">Sin desvíos (1).</td></tr>';
+      return;
+    }
+
+    tbAcc.innerHTML = devs.map(function(x){
+      var d = x.d, idx = x.idx;
+
+      return ''
+      + '<tr>'
+      + '<td class="left">'
+      + '  <div><b>Garrón '+esc(d.g)+'</b></div>'
+      + '  <div style="margin-top:8px; display:grid; gap:6px;">'
+      + '    <select onchange="saveField('+idx+',\'lado\',this.value)">'
+      + '      <option value="">Lado</option>'
+      + '      <option value="Izquierdo" '+(d.lado==="Izquierdo"?"selected":"")+'>Izquierdo</option>'
+      + '      <option value="Derecho" '+(d.lado==="Derecho"?"selected":"")+'>Derecho</option>'
+      + '    </select>'
+      + '    <select onchange="saveField('+idx+',\'ubicacion\',this.value)">'
+      + '      <option value="">Ubicación</option>'
+      + '      <option value="Garrón" '+(d.ubicacion==="Garrón"?"selected":"")+'>Garrón</option>'
+      + '      <option value="Culata" '+(d.ubicacion==="Culata"?"selected":"")+'>Culata</option>'
+      + '      <option value="Nalga - Bola de lomo" '+(d.ubicacion==="Nalga - Bola de lomo"?"selected":"")+'>Nalga - Bola de lomo</option>'
+      + '      <option value="Bifes - Cuadril" '+(d.ubicacion==="Bifes - Cuadril"?"selected":"")+'>Bifes - Cuadril</option>'
+      + '      <option value="Pecho - Matambre - Ijada" '+(d.ubicacion==="Pecho - Matambre - Ijada"?"selected":"")+'>Pecho - Matambre - Ijada</option>'
+      + '      <option value="Lomo - Costillas" '+(d.ubicacion==="Lomo - Costillas"?"selected":"")+'>Lomo - Costillas</option>'
+      + '      <option value="Brazuelo - Cogote" '+(d.ubicacion==="Brazuelo - Cogote"?"selected":"")+'>Brazuelo - Cogote</option>'
+      + '      <option value="Marucha - Paleta" '+(d.ubicacion==="Marucha - Paleta"?"selected":"")+'>Marucha - Paleta</option>'
+      + '      <option value="Vacío - Entraña" '+(d.ubicacion==="Vacío - Entraña"?"selected":"")+'>Vacío - Entraña</option>'
+      + '    </select>'
+      + '  </div>'
+      + '</td>'
+
+      + '<td>'+esc(d.h || "")+'</td>'
+
+      // ✅ Fecha editable (diaria)
+      + '<td><input type="date" value="'+escAttr(d.fechaDesvio)+'" onchange="saveField('+idx+',\'fechaDesvio\',this.value)"'
+      + ' onfocus="if(!this.value){this.value=\''+todayISO()+'\'; saveField('+idx+',\'fechaDesvio\',this.value);}"></td>'
+
+      // ✅ Descripción del desvío (primero)
+      + '<td><textarea oninput="saveField('+idx+',\'descDesvio\',this.value)">'+esc(d.descDesvio)+'</textarea></td>'
+
+      + '<td><textarea oninput="saveField('+idx+',\'nc\',this.value)">'+esc(d.nc)+'</textarea></td>'
+      + '<td><textarea oninput="saveField('+idx+',\'ac\',this.value)">'+esc(d.ac)+'</textarea></td>'
+      + '<td><textarea oninput="saveField('+idx+',\'ap\',this.value)">'+esc(d.ap)+'</textarea></td>'
+      + '<td><input value="'+escAttr(d.enc)+'" oninput="saveField('+idx+',\'enc\',this.value)"></td>'
+      + '</tr>';
+    }).join("");
+  }
+
+  function renderFinalizados(){
+    if(!finalizados.length){
+      tbFinal.innerHTML = '<tr><td colspan="4" style="text-align:left; color:#64748b;">Sin días finalizados.</td></tr>';
+      return;
+    }
+
+    tbFinal.innerHTML = finalizados.map(function(d,i){
+      var estado = d.locked ? '<span class="badge lock">Bloqueado</span>' : '<span class="badge edit">Editable</span>';
+      var btnEditar = d.locked
+        ? '<button class="mini" disabled>Editar</button>'
+        : '<button class="mini" onclick="cargarDia('+i+')">Editar</button>';
+
+      return ''
+      + '<tr>'
+      + '<td><b>'+esc(d.fecha)+'</b></td>'
+      + '<td>'+(d.datos||[]).length+'</td>'
+      + '<td>'+estado+'</td>'
+      + '<td class="left">'
+      + btnEditar
+      + ' <button class="mini" onclick="pdfDia('+i+')">PDF</button>'
+      + ' <button class="mini" onclick="toggleLockDia('+i+')">'+(d.locked ? 'Editable' : 'Bloqueado')+'</button>'
+      + ' <button class="mini red" onclick="borrarDia('+i+')">Borrar</button>'
+      + '</td>'
+      + '</tr>';
+    }).join("");
+  }
+
+  function renderAll(){
+    setLockUI();
+    renderRegistro();
+    renderAcciones();
+  }
+
+  function finalizarDia(){
+    if(!data.length){ alert("No hay registros."); return; }
+    var fecha = todayISO();
+    var snap = {
+      fecha: fecha,
+      locked: isLocked(),
+      savedAt: new Date().toISOString(),
+      datos: JSON.parse(JSON.stringify(data))
+    };
+    // reemplaza mismo día si existe
+    finalizados = finalizados.filter(function(x){ return x.fecha !== fecha; });
+    finalizados.unshift(snap);
+    saveFinal();
+    alert("Día guardado ✅");
+    renderFinalizados();
+  }
+
+  window.cargarDia = function(i){
+    if(!finalizados[i]) return;
+    if(finalizados[i].locked){ alert("Bloqueado."); return; }
+    data = JSON.parse(JSON.stringify(finalizados[i].datos || []));
+    saveDay();
+    updateGarron();
+    renderAll();
+
+    // ir a Registro
+    var btn = document.querySelector('.tab-btn[data-tab="tab1"]');
+    if(btn) btn.click();
+  };
+
+  window.borrarDia = function(i){
+    if(!finalizados[i]) return;
+    if(!confirm("¿Borrar día finalizado?")) return;
+    finalizados.splice(i,1);
+    saveFinal();
+    renderFinalizados();
+  };
+
+  window.toggleLockDia = function(i){
+    if(!finalizados[i]) return;
+    finalizados[i].locked = !finalizados[i].locked;
+    saveFinal();
+    renderFinalizados();
+  };
+
+  window.pdfDia = function(i){
+    if(!finalizados[i]) return;
+    var prev = data;
+    data = JSON.parse(JSON.stringify(finalizados[i].datos || []));
+    imprimirTodo();
+    data = prev;
+  };
+
+  function headerPrintHTML(){
+    return ''
+    + '<div class="encabezado-print">'
+    + '<table><tr>'
+    + '<td class="logo"><img src="logo.jpg" onerror="this.onerror=null;this.src=\'logo.png\';" alt="Logo"></td>'
+    + '<td class="titulo"><strong>SISTEMA DE GESTIÓN DE CALIDAD</strong><br>INSPECCIÓN DE CARCASAS ANTES DEL LAVADO<br>'
+    + '<span style="font-weight:900; color:#0b3d91;">PCC 1 FAENA</span></td>'
+    + '<td class="info">RG-HCCP - PCC - 307/1<br>Emisión: 23/02/2026<br>Rev. 12</td>'
+    + '</tr></table></div>';
+  }
+
+  function firmasHTML(){
+    var fecha = new Date().toLocaleDateString("es-AR");
+    return ''
+    + '<div class="p-firmas">'
+    + '  <div class="p-firma-box"><div><b>Analista</b></div><div class="p-line"></div><div class="p-small">Aclaración:</div></div>'
+    + '  <div class="p-firma-box"><div><b>Verificador</b></div><div class="p-line"></div><div class="p-small">Aclaración:</div></div>'
+    + '</div>'
+    + '<div class="p-right p-small" style="margin-top:8px;"><b>Fecha:</b> '+esc(fecha)+'</div>';
+  }
+
+  function imprimirTodo(){
+    var fecha = new Date().toLocaleDateString("es-AR");
+    var html = '<div class="print-page">';
+
+    html += headerPrintHTML();
+    html += '<div class="p-title">REGISTRO PCC 1 - '+esc(fecha)+'</div>';
+    html += ''
+      + '<table class="p-table">'
+      + '<thead><tr><th>Garrón</th><th>Hora</th><th>0/1</th><th>Resp</th></tr></thead>'
+      + '<tbody>'
+      + data.map(function(d){
+          return '<tr><td>'+esc(d.g)+'</td><td>'+esc(d.h)+'</td><td>'+esc(d.b)+'</td><td>'+esc(d.r)+'</td></tr>';
+        }).join("")
+      + '</tbody></table>';
+
+    var devs = data.filter(function(d){ return d.b==="1"; });
+
+    html += headerPrintHTML();
+    html += '<div class="p-title">ACCIONES</div>';
+    html += ''
+      + '<table class="p-table">'
+      + '<thead>'
+      + '<tr>'
+      + '<th>Garrón</th><th>Lado</th><th>Ubicación</th><th>Hora</th>'
+      + '<th>Fecha</th><th>Descripción del desvío</th>'
+      + '<th>No conformidad</th><th>Acción correctiva</th><th>Acción preventiva</th><th>Encargado</th>'
+      + '</tr>'
+      + '</thead>'
+      + '<tbody>'
+      + devs.map(function(d){
+          return ''
+          + '<tr>'
+          + '<td>'+esc(d.g)+'</td>'
+          + '<td>'+esc(d.lado)+'</td>'
+          + '<td>'+esc(d.ubicacion)+'</td>'
+          + '<td>'+esc(d.h)+'</td>'
+          + '<td>'+esc(d.fechaDesvio)+'</td>'
+          + '<td>'+esc(d.descDesvio)+'</td>'
+          + '<td>'+esc(d.nc)+'</td>'
+          + '<td>'+esc(d.ac)+'</td>'
+          + '<td>'+esc(d.ap)+'</td>'
+          + '<td>'+esc(d.enc)+'</td>'
+          + '</tr>';
+        }).join("")
+      + '</tbody></table>';
+
+    html += firmasHTML();
+    html += '</div>';
+
+    document.getElementById("print-replica").innerHTML = html;
+    setTimeout(function(){ window.print(); }, 200);
+  }
+
+  // INIT
+  loadAll();
+  capTime();
+  updateGarron();
+  renderAll();
+  renderFinalizados();
+</script>
+
+</body>
+</html>
