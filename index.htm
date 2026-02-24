@@ -168,6 +168,12 @@
   </div>
 
   <div class="card-entry">
+    <!-- ✅ NUEVO: FECHA DEL DÍA -->
+    <div class="row">
+      <label>FECHA (DÍA DE REGISTRO)</label>
+      <input type="date" id="dayDate">
+    </div>
+
     <div class="row">
       <label>GARRÓN</label>
       <input id="inG" readonly>
@@ -211,7 +217,6 @@
     <button class="tab-btn" data-tab="tab3">DÍAS FINALIZADOS</button>
   </div>
 
-  <!-- TAB 1 -->
   <div id="tab1" class="tab-content active">
     <div class="table-container">
       <table>
@@ -229,7 +234,6 @@
     </div>
   </div>
 
-  <!-- TAB 2 -->
   <div id="tab2" class="tab-content">
     <div class="table-container">
       <table>
@@ -237,11 +241,8 @@
           <tr>
             <th>Garrón / Lado / Ubicación</th>
             <th style="width:90px;">Hora</th>
-
-            <!-- ✅ NUEVO: fecha + descripción (primero) -->
             <th style="width:130px;">Fecha</th>
             <th>Descripción del desvío</th>
-
             <th>No conformidad</th>
             <th>Acción correctiva</th>
             <th>Acción preventiva</th>
@@ -253,7 +254,6 @@
     </div>
   </div>
 
-  <!-- TAB 3 -->
   <div id="tab3" class="tab-content">
     <div class="table-container">
       <table>
@@ -273,21 +273,22 @@
   <div id="print-replica"></div>
 
 <script>
-  // Storage
-  const LS_DAY   = "pcc1_day_v6";
-  const LS_FINAL = "pcc1_final_v6";
-  const LS_LOCK  = "pcc1_lock_v6";
+  const LS_DAYDATE = "pcc1_daydate_v7";
+  const LS_DAY     = "pcc1_day_v7";
+  const LS_FINAL   = "pcc1_final_v7";
+  const LS_LOCK    = "pcc1_lock_v7";
 
   var data = [];
   var finalizados = [];
+  var dayDate = "";
 
-  // Elements
   var elLogo = document.getElementById("logoImg");
   var btnHora = document.getElementById("btnHora");
   var btnPDF = document.getElementById("btnPDF");
   var btnFinalizar = document.getElementById("btnFinalizar");
   var btnBorrar = document.getElementById("btnBorrar");
 
+  var inpDayDate = document.getElementById("dayDate");
   var inG = document.getElementById("inG");
   var inH = document.getElementById("inH");
   var inB = document.getElementById("inB");
@@ -301,7 +302,6 @@
   var tbAcc = document.getElementById("tbAcc");
   var tbFinal = document.getElementById("tbFinal");
 
-  // Logo fallback
   (function(){
     if(!elLogo) return;
     var candidates = ["logo.jpg","logo.jpeg","logo.png","logo.jpg.jpeg","LOGO.jpg","LOGO.JPG","Logo.jpg"];
@@ -340,7 +340,6 @@
     lockTxt.textContent = isLocked() ? "Bloqueado" : "Editable";
     lockBadge.textContent = isLocked() ? "BLOQUEADO" : "EDITABLE";
     lockBadge.className = "badge " + (isLocked() ? "lock" : "edit");
-    // En bloqueo: no editar hora del alta (se toma del dispositivo)
     inH.disabled = isLocked();
   }
 
@@ -361,12 +360,21 @@
 
     lockMode.checked = (localStorage.getItem(LS_LOCK) === "1");
     setLockUI();
+
+    dayDate = localStorage.getItem(LS_DAYDATE) || "";
+    if(!dayDate) dayDate = todayISO();
+    inpDayDate.value = dayDate;
   }
 
   function saveDay(){ localStorage.setItem(LS_DAY, JSON.stringify(data)); }
   function saveFinal(){ localStorage.setItem(LS_FINAL, JSON.stringify(finalizados)); }
+  function saveDayDate(){ localStorage.setItem(LS_DAYDATE, dayDate); }
 
-  // Tabs
+  inpDayDate.addEventListener("change", function(){
+    dayDate = inpDayDate.value || todayISO();
+    saveDayDate();
+  });
+
   var tabBtns = document.querySelectorAll(".tab-btn");
   for(var i=0;i<tabBtns.length;i++){
     tabBtns[i].addEventListener("click", function(){
@@ -399,12 +407,11 @@
     renderAll();
   });
 
-  // Alta por resp
   inR.addEventListener("change", function(){
     var resp = (inR.value || "").trim().toUpperCase();
     if(!resp) return;
 
-    if(isLocked()) capTime(); // en bloqueo toma hora del dispositivo
+    if(isLocked()) capTime();
 
     data.push({
       g: data.length + 1,
@@ -412,7 +419,6 @@
       b: inB.value || "0",
       r: resp,
 
-      // Acciones (solo si b=1)
       lado:"",
       ubicacion:"",
       fechaDesvio:"",
@@ -430,7 +436,6 @@
     if(isLocked()) capTime();
   });
 
-  // Editar fila completa (solo si NO está bloqueado)
   window.updRow = function(idx, field, value){
     if(isLocked()) return;
 
@@ -459,7 +464,6 @@
     renderAll();
   };
 
-  // Guardar campos de acciones (siempre editable)
   window.saveField = function(idx, field, value){
     data[idx][field] = value;
     saveDay();
@@ -543,16 +547,9 @@
       + '    </select>'
       + '  </div>'
       + '</td>'
-
       + '<td>'+esc(d.h || "")+'</td>'
-
-      // ✅ Fecha editable (diaria)
-      + '<td><input type="date" value="'+escAttr(d.fechaDesvio)+'" onchange="saveField('+idx+',\'fechaDesvio\',this.value)"'
-      + ' onfocus="if(!this.value){this.value=\''+todayISO()+'\'; saveField('+idx+',\'fechaDesvio\',this.value);}"></td>'
-
-      // ✅ Descripción del desvío (primero)
+      + '<td><input type="date" value="'+escAttr(d.fechaDesvio)+'" onchange="saveField('+idx+',\'fechaDesvio\',this.value)"></td>'
       + '<td><textarea oninput="saveField('+idx+',\'descDesvio\',this.value)">'+esc(d.descDesvio)+'</textarea></td>'
-
       + '<td><textarea oninput="saveField('+idx+',\'nc\',this.value)">'+esc(d.nc)+'</textarea></td>'
       + '<td><textarea oninput="saveField('+idx+',\'ac\',this.value)">'+esc(d.ac)+'</textarea></td>'
       + '<td><textarea oninput="saveField('+idx+',\'ap\',this.value)">'+esc(d.ap)+'</textarea></td>'
@@ -596,15 +593,15 @@
 
   function finalizarDia(){
     if(!data.length){ alert("No hay registros."); return; }
-    var fecha = todayISO();
+    if(!dayDate){ alert("Falta la fecha del día."); return; }
+
     var snap = {
-      fecha: fecha,
+      fecha: dayDate,
       locked: isLocked(),
       savedAt: new Date().toISOString(),
       datos: JSON.parse(JSON.stringify(data))
     };
-    // reemplaza mismo día si existe
-    finalizados = finalizados.filter(function(x){ return x.fecha !== fecha; });
+    finalizados = finalizados.filter(function(x){ return x.fecha !== dayDate; });
     finalizados.unshift(snap);
     saveFinal();
     alert("Día guardado ✅");
@@ -615,11 +612,12 @@
     if(!finalizados[i]) return;
     if(finalizados[i].locked){ alert("Bloqueado."); return; }
     data = JSON.parse(JSON.stringify(finalizados[i].datos || []));
+    dayDate = finalizados[i].fecha || todayISO();
+    inpDayDate.value = dayDate;
+    saveDayDate();
     saveDay();
     updateGarron();
     renderAll();
-
-    // ir a Registro
     var btn = document.querySelector('.tab-btn[data-tab="tab1"]');
     if(btn) btn.click();
   };
@@ -641,17 +639,19 @@
 
   window.pdfDia = function(i){
     if(!finalizados[i]) return;
-    var prev = data;
+    var prevData = data, prevDate = dayDate;
     data = JSON.parse(JSON.stringify(finalizados[i].datos || []));
+    dayDate = finalizados[i].fecha || prevDate;
     imprimirTodo();
-    data = prev;
+    data = prevData;
+    dayDate = prevDate;
   };
 
   function headerPrintHTML(){
     return ''
     + '<div class="encabezado-print">'
     + '<table><tr>'
-    + '<td class="logo"><img src="logo.jpg" onerror="this.onerror=null;this.src=\'logo.png\';" alt="Logo"></td>'
+    + '<td class="logo"><img src="logo.jpg" onerror="this.onerror=null;this.src=\\'logo.png\\';" alt="Logo"></td>'
     + '<td class="titulo"><strong>SISTEMA DE GESTIÓN DE CALIDAD</strong><br>INSPECCIÓN DE CARCASAS ANTES DEL LAVADO<br>'
     + '<span style="font-weight:900; color:#0b3d91;">PCC 1 FAENA</span></td>'
     + '<td class="info">RG-HCCP - PCC - 307/1<br>Emisión: 23/02/2026<br>Rev. 12</td>'
@@ -665,15 +665,13 @@
     + '  <div class="p-firma-box"><div><b>Analista</b></div><div class="p-line"></div><div class="p-small">Aclaración:</div></div>'
     + '  <div class="p-firma-box"><div><b>Verificador</b></div><div class="p-line"></div><div class="p-small">Aclaración:</div></div>'
     + '</div>'
-    + '<div class="p-right p-small" style="margin-top:8px;"><b>Fecha:</b> '+esc(fecha)+'</div>';
+    + '<div class="p-right p-small" style="margin-top:8px;"><b>Fecha impresión:</b> '+esc(fecha)+'</div>';
   }
 
   function imprimirTodo(){
-    var fecha = new Date().toLocaleDateString("es-AR");
     var html = '<div class="print-page">';
-
     html += headerPrintHTML();
-    html += '<div class="p-title">REGISTRO PCC 1 - '+esc(fecha)+'</div>';
+    html += '<div class="p-title">REGISTRO PCC 1 - '+esc(dayDate || "")+'</div>';
     html += ''
       + '<table class="p-table">'
       + '<thead><tr><th>Garrón</th><th>Hora</th><th>0/1</th><th>Resp</th></tr></thead>'
