@@ -13,7 +13,6 @@
     }
     body{ margin:0; padding:10px; font-family:Arial, sans-serif; background:var(--bg); color:var(--text); }
 
-    /* Encabezado */
     .encabezado table{ width:100%; border-collapse:collapse; background:#fff; margin-bottom:10px; }
     .encabezado td{ border:2px solid #000; padding:8px; vertical-align:middle; }
     .logo{ width:20%; text-align:center; background:#f3f4f6; }
@@ -22,7 +21,6 @@
     .titulo span{ color:#0b3d91; font-weight:700; }
     .info{ width:20%; text-align:center; background:#cfefff; font-size:12px; line-height:1.25; }
 
-    /* Tabs */
     .tabs{ display:flex; gap:6px; margin-bottom:10px; }
     .tab-btn{
       flex:1; padding:12px; cursor:pointer; font-weight:900;
@@ -33,7 +31,6 @@
     .tab-content{ display:none; }
     .tab-content.active{ display:block; }
 
-    /* Toolbar */
     .toolbar{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
     .toolbar button{
       padding:10px 12px; border:none; border-radius:12px; cursor:pointer; font-weight:900; color:#fff;
@@ -42,9 +39,7 @@
     .toolbar .sky{ background:var(--sky); }
     .toolbar .green{ background:var(--green); }
     .toolbar .red{ background:var(--red); }
-    .toolbar .gray{ background:var(--gray); }
 
-    /* Form */
     .card-entry{
       background:var(--card);
       border:1px solid var(--border);
@@ -71,9 +66,7 @@
       display:flex; align-items:center; gap:10px; margin-top:6px;
       font-size:12px; color:var(--muted); font-weight:900;
     }
-    .switchline span{ opacity:.9; }
 
-    /* Tables */
     .table-container{
       background:var(--card);
       border:1px solid var(--border);
@@ -83,13 +76,12 @@
     table{ width:100%; border-collapse:collapse; }
     th, td{ border-bottom:1px solid var(--border); padding:10px; text-align:center; font-size:13px; vertical-align:top; }
     th{ position:sticky; top:0; background:#f8fafc; color:var(--muted); font-weight:900; }
-    td.left{ text-align:left; }
 
+    td.left{ text-align:left; }
     .mini{
       border:none; border-radius:10px; padding:8px 10px; cursor:pointer;
       font-weight:900; color:#fff; background:var(--gray);
     }
-    .mini.blue{ background:var(--blue); }
     .mini.red{ background:var(--red); }
     .mini:disabled{ opacity:.35; cursor:not-allowed; }
 
@@ -101,35 +93,59 @@
     .badge.ro{ background:#fee2e2; color:#7f1d1d; }
     .badge.ed{ background:#dcfce7; color:#14532d; }
 
-    /* Print */
+    .cell-inp{ padding:6px 8px; border-radius:10px; border:1px solid var(--border); font-size:13px; }
+    .cell-sel{ padding:6px 8px; border-radius:10px; border:1px solid var(--border); font-size:13px; background:#fff; }
+
     #print-replica{ display:none; }
     @media print{
       .tabs, .toolbar, .card-entry, .table-container { display:none !important; }
       #print-replica{ display:block !important; }
       body > .encabezado{ display:none !important; }
+
       @page{ size:A4 landscape; margin:0.6cm; }
+
       .p-table{ width:100%; border-collapse:collapse; table-layout:fixed; }
       .p-table th, .p-table td{ border:1px solid #000; padding:4px; font-size:9pt; }
       .p-table th{ background:#eee; }
       .p-title{ text-align:center; font-weight:900; margin:8px 0 10px; }
+
       .encabezado-print table{ width:100%; border-collapse:collapse; margin-bottom:8px; }
       .encabezado-print td{ border:2px solid #000; padding:6px; vertical-align:middle; }
       .encabezado-print .logo{ width:20%; text-align:center; }
       .encabezado-print .logo img{ max-width:130px; max-height:60px; object-fit:contain; }
       .encabezado-print .titulo{ width:60%; text-align:center; font-size:12px; }
       .encabezado-print .info{ width:20%; text-align:center; font-size:11px; background:#cfefff; }
+
+      /* Firmas */
+      .p-firmas{
+        margin-top:14px;
+        display:flex;
+        gap:20px;
+        justify-content:space-between;
+        align-items:flex-end;
+        font-size:10pt;
+      }
+      .p-firma-box{
+        width:48%;
+        border:1px solid #000;
+        padding:10px;
+      }
+      .p-line{
+        border-bottom:1px solid #000;
+        height:18px;
+        margin:12px 0 6px;
+      }
+      .p-small{ font-size:9pt; }
+      .p-right{ text-align:right; }
     }
   </style>
 </head>
 
 <body>
-  <!-- ENCABEZADO -->
   <div class="encabezado">
     <table>
       <tr>
-        <td class="logo">
-          <img id="logoImg" src="logo.jpg" alt="Logo">
-        </td>
+        <td class="logo"><img id="logoImg" src="logo.jpg" alt="Logo"></td>
         <td class="titulo">
           <strong>SISTEMA DE GESTIÓN DE CALIDAD</strong><br>
           INSPECCIÓN DE CARCASAS ANTES DEL LAVADO<br>
@@ -200,11 +216,11 @@
       <table>
         <thead>
           <tr>
-            <th>G</th>
+            <th>Garrón</th>
             <th>Hora</th>
             <th>0/1</th>
             <th>Resp</th>
-            <th style="width:170px;">Editar</th>
+            <th style="width:110px;">Borrar</th>
           </tr>
         </thead>
         <tbody id="tbReg"></tbody>
@@ -252,15 +268,13 @@
   <div id="print-replica"></div>
 
 <script>
-  // ====== STORAGE ======
-  const LS_DAY = "pcc1_day_v1";
-  const LS_FINAL = "pcc1_final_v1";
-  const LS_AUTO = "pcc1_auto_v1";
+  const LS_DAY   = "pcc1_day_v5";
+  const LS_FINAL = "pcc1_final_v5";
+  const LS_AUTO  = "pcc1_auto_v5";
 
   let data = [];
   let finalizados = [];
 
-  // ====== DOM ======
   const elLogo = document.getElementById("logoImg");
   const btnHora = document.getElementById("btnHora");
   const btnPDF = document.getElementById("btnPDF");
@@ -279,7 +293,6 @@
   const tbAcc = document.getElementById("tbAcc");
   const tbFinal = document.getElementById("tbFinal");
 
-  // ====== LOGO fallback ======
   (function(){
     if(!elLogo) return;
     const candidates = ["logo.jpg","logo.jpeg","logo.png","logo.jpg.jpeg"];
@@ -292,7 +305,6 @@
     elLogo.src = candidates[0];
   })();
 
-  // ====== HELPERS ======
   function esc(s){
     return String(s ?? "")
       .replaceAll("&","&amp;")
@@ -311,24 +323,16 @@
     const d = new Date();
     return String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
   }
-
   function capTime(){ inH.value = nowHHMM(); }
-
   function isAutoOn(){ return !!autoHora.checked; }
 
+  // Auto hora: bloquea solo el input de hora del alta + edición de fila (pero NO acciones)
   function setAutoUI(){
     autoTxt.textContent = isAutoOn() ? "Auto" : "Manual";
-
-    // Hora manual bloqueada cuando Auto
     inH.disabled = isAutoOn();
-
-    // Acciones bloqueadas cuando Auto
-    tbAcc.querySelectorAll("input,select,textarea").forEach(el => el.disabled = isAutoOn());
   }
 
-  function updateGarron(){
-    inG.value = data.length + 1;
-  }
+  function updateGarron(){ inG.value = data.length + 1; }
 
   function loadAll(){
     try{
@@ -341,15 +345,13 @@
       if(!Array.isArray(finalizados)) finalizados = [];
     }catch{ finalizados = []; }
 
-    const savedAuto = localStorage.getItem(LS_AUTO) === "1";
-    autoHora.checked = savedAuto;
+    autoHora.checked = (localStorage.getItem(LS_AUTO) === "1");
     setAutoUI();
   }
-
   function saveDay(){ localStorage.setItem(LS_DAY, JSON.stringify(data)); }
   function saveFinal(){ localStorage.setItem(LS_FINAL, JSON.stringify(finalizados)); }
 
-  // ====== TABS ======
+  // Tabs
   document.querySelectorAll(".tab-btn").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
@@ -360,13 +362,14 @@
     });
   });
 
-  // ====== EVENTS ======
   btnHora.addEventListener("click", capTime);
+  btnPDF.addEventListener("click", imprimirTodo);
+  btnFinalizar.addEventListener("click", finalizarDia);
 
   autoHora.addEventListener("change", ()=>{
     localStorage.setItem(LS_AUTO, autoHora.checked ? "1" : "0");
     setAutoUI();
-    renderRegistro(); // para que botones queden deshabilitados
+    renderRegistro();
   });
 
   btnBorrar.addEventListener("click", ()=>{
@@ -377,15 +380,11 @@
     renderAll();
   });
 
-  btnFinalizar.addEventListener("click", finalizarDia);
-
-  btnPDF.addEventListener("click", imprimirTodo);
-
+  // Alta por iniciales
   inR.addEventListener("change", ()=>{
     const resp = (inR.value || "").trim().toUpperCase();
     if(!resp) return;
 
-    // auto hora = toma hora del dispositivo al guardar
     if(isAutoOn()) capTime();
 
     data.push({
@@ -407,21 +406,28 @@
     saveDay();
     updateGarron();
     renderAll();
-
     if(isAutoOn()) capTime();
   });
 
-  // ====== EDIT / DELETE ROW ======
-  function editRow(idx){
+  // Edición desde tabla
+  function updRow(idx, field, value){
     if(isAutoOn()) return;
-    const cur = String(data[idx].g ?? "");
-    const nuevo = prompt("Editar garrón:", cur);
-    if(nuevo === null) return;
-    const n = Number(nuevo);
-    if(!Number.isFinite(n) || n <= 0){ alert("Número inválido"); return; }
-    data[idx].g = n;
+
+    if(field === "g"){
+      const n = Number(value);
+      if(!Number.isFinite(n) || n <= 0) return;
+      data[idx].g = n;
+    } else if(field === "b"){
+      if(value !== "0" && value !== "1") return;
+      data[idx].b = value;
+    } else if(field === "r"){
+      data[idx].r = String(value || "").trim().toUpperCase();
+    } else if(field === "h"){
+      data[idx].h = value || "";
+    }
+
     saveDay();
-    renderAll();
+    renderAcciones(); // si cambió 0/1, refresca Acciones
   }
 
   function deleteRow(idx){
@@ -433,20 +439,46 @@
     renderAll();
   }
 
-  // ====== RENDER ======
   function renderRegistro(){
-    tbReg.innerHTML = data.map((d,idx)=>`
-      <tr>
-        <td>${esc(d.g)}</td>
-        <td>${esc(d.h)}</td>
-        <td>${esc(d.b)}</td>
-        <td>${esc(d.r)}</td>
-        <td>
-          <button class="mini blue" onclick="editRow(${idx})" ${isAutoOn() ? "disabled" : ""}>✏️</button>
-          <button class="mini red" onclick="deleteRow(${idx})" ${isAutoOn() ? "disabled" : ""}>🗑️</button>
-        </td>
-      </tr>
-    `).join("");
+    const locked = isAutoOn();
+
+    tbReg.innerHTML = data.map((d,idx)=>{
+      if(locked){
+        return `
+          <tr>
+            <td>${esc(d.g)}</td>
+            <td>${esc(d.h)}</td>
+            <td>${esc(d.b)}</td>
+            <td>${esc(d.r)}</td>
+            <td><button class="mini red" disabled>🗑️</button></td>
+          </tr>
+        `;
+      }
+
+      return `
+        <tr>
+          <td><input class="cell-inp" inputmode="numeric" value="${escAttr(d.g)}" oninput="updRow(${idx},'g',this.value)"></td>
+          <td><input class="cell-inp" type="time" step="60" value="${escAttr(d.h)}" onchange="updRow(${idx},'h',this.value)"></td>
+          <td>
+            <select class="cell-sel" onchange="updRow(${idx},'b',this.value)">
+              <option value="0" ${d.b==="0"?"selected":""}>0</option>
+              <option value="1" ${d.b==="1"?"selected":""}>1</option>
+            </select>
+          </td>
+          <td>
+            <select class="cell-sel" onchange="updRow(${idx},'r',this.value)">
+              <option value="" ${!d.r?"selected":""}>-</option>
+              <option value="MQ" ${d.r==="MQ"?"selected":""}>MQ</option>
+              <option value="MD" ${d.r==="MD"?"selected":""}>MD</option>
+              <option value="WC" ${d.r==="WC"?"selected":""}>WC</option>
+              <option value="DE" ${d.r==="DE"?"selected":""}>DE</option>
+              <option value="GV" ${d.r==="GV"?"selected":""}>GV</option>
+            </select>
+          </td>
+          <td><button class="mini red" onclick="deleteRow(${idx})">🗑️</button></td>
+        </tr>
+      `;
+    }).join("");
   }
 
   function saveField(idx, field, value){
@@ -454,8 +486,13 @@
     saveDay();
   }
 
+  // Acciones (solo para b=1) siempre editables
   function renderAcciones(){
     const devs = data.map((d,idx)=>({d,idx})).filter(x=>x.d.b==="1");
+    if(devs.length === 0){
+      tbAcc.innerHTML = `<tr><td colspan="7" style="text-align:left;color:#64748b;">Sin desvíos (1).</td></tr>`;
+      return;
+    }
 
     tbAcc.innerHTML = devs.map(x=>{
       const d = x.d, idx = x.idx;
@@ -464,13 +501,13 @@
           <td class="left">
             <div><b>Garrón ${esc(d.g)}</b></div>
             <div style="margin-top:8px; display:grid; gap:6px;">
-              <select onchange="saveField(${idx},'lado',this.value)" ${isAutoOn() ? "disabled" : ""}>
+              <select onchange="saveField(${idx},'lado',this.value)">
                 <option value="">Lado</option>
                 <option value="Izquierdo" ${d.lado==="Izquierdo"?"selected":""}>Izquierdo</option>
                 <option value="Derecho" ${d.lado==="Derecho"?"selected":""}>Derecho</option>
               </select>
 
-              <select onchange="saveField(${idx},'ubicacion',this.value)" ${isAutoOn() ? "disabled" : ""}>
+              <select onchange="saveField(${idx},'ubicacion',this.value)">
                 <option value="">Ubicación</option>
                 <option value="Garrón" ${d.ubicacion==="Garrón"?"selected":""}>Garrón</option>
                 <option value="Culata" ${d.ubicacion==="Culata"?"selected":""}>Culata</option>
@@ -487,26 +524,16 @@
 
           <td>${esc(d.h || "")}</td>
 
-          <td>
-            <textarea ${isAutoOn() ? "disabled" : ""} oninput="saveField(${idx},'accionCorrectiva',this.value)">${esc(d.accionCorrectiva)}</textarea>
-          </td>
+          <td><textarea oninput="saveField(${idx},'accionCorrectiva',this.value)">${esc(d.accionCorrectiva)}</textarea></td>
 
-          <td>
-            <input type="time" step="60" ${isAutoOn() ? "disabled" : ""} value="${escAttr(d.horaCorreccion)}"
-              onchange="saveField(${idx},'horaCorreccion',this.value)">
-          </td>
+          <td><input type="time" step="60" value="${escAttr(d.horaCorreccion)}"
+            onchange="saveField(${idx},'horaCorreccion',this.value)"></td>
 
-          <td>
-            <textarea ${isAutoOn() ? "disabled" : ""} oninput="saveField(${idx},'restablecimiento',this.value)">${esc(d.restablecimiento)}</textarea>
-          </td>
+          <td><textarea oninput="saveField(${idx},'restablecimiento',this.value)">${esc(d.restablecimiento)}</textarea></td>
 
-          <td>
-            <textarea ${isAutoOn() ? "disabled" : ""} oninput="saveField(${idx},'preventiva',this.value)">${esc(d.preventiva)}</textarea>
-          </td>
+          <td><textarea oninput="saveField(${idx},'preventiva',this.value)">${esc(d.preventiva)}</textarea></td>
 
-          <td>
-            <input ${isAutoOn() ? "disabled" : ""} value="${escAttr(d.encargado)}" oninput="saveField(${idx},'encargado',this.value)">
-          </td>
+          <td><input value="${escAttr(d.encargado)}" oninput="saveField(${idx},'encargado',this.value)"></td>
         </tr>
       `;
     }).join("");
@@ -517,16 +544,13 @@
       tbFinal.innerHTML = `<tr><td colspan="4" style="text-align:left; color:#64748b;">Sin días finalizados.</td></tr>`;
       return;
     }
-
     tbFinal.innerHTML = finalizados.map((d,i)=>{
       const estado = d.readOnly
         ? `<span class="badge ro">Solo lectura</span>`
         : `<span class="badge ed">Editable</span>`;
-
       const btnCargar = d.readOnly
         ? `<button class="mini" disabled>Editar</button>`
-        : `<button class="mini blue" onclick="cargarDia(${i})">Editar</button>`;
-
+        : `<button class="mini" onclick="cargarDia(${i})">Editar</button>`;
       return `
         <tr>
           <td><b>${esc(d.fecha)}</b></td>
@@ -549,28 +573,16 @@
     renderAcciones();
   }
 
-  // ====== FINALIZAR + HISTORIAL ======
-  function finalizeDateISO(){
-    return new Date().toISOString().slice(0,10);
-  }
+  function finalizeDateISO(){ return new Date().toISOString().slice(0,10); }
 
   function finalizarDia(){
     if(!data.length){ alert("No hay registros."); return; }
-
     const fecha = finalizeDateISO();
-    const readOnly = isAutoOn(); // si auto hora está ON, guardamos como solo lectura
-
-    const snap = {
-      fecha,
-      readOnly,
-      savedAt: new Date().toISOString(),
-      datos: JSON.parse(JSON.stringify(data))
-    };
-
+    const readOnly = isAutoOn();
+    const snap = { fecha, readOnly, savedAt:new Date().toISOString(), datos: JSON.parse(JSON.stringify(data)) };
     finalizados = finalizados.filter(x=>x.fecha !== fecha);
     finalizados.unshift(snap);
     saveFinal();
-
     alert("Día guardado ✅");
     renderFinalizados();
   }
@@ -583,7 +595,6 @@
     updateGarron();
     renderAll();
 
-    // volver a Registro
     document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
     document.querySelectorAll(".tab-content").forEach(t=>t.classList.remove("active"));
     document.querySelector('.tab-btn[data-tab="tab1"]').classList.add("active");
@@ -613,7 +624,6 @@
     data = prev;
   }
 
-  // ====== PRINT ======
   function headerPrintHTML(){
     return `
       <div class="encabezado-print">
@@ -628,6 +638,27 @@
     `;
   }
 
+  // ✅ Firmas al final (línea para firma)
+  function firmasHTML(){
+    const fecha = new Date().toLocaleDateString("es-AR");
+    return `
+      <div class="p-firmas">
+        <div class="p-firma-box">
+          <div><b>Analista</b></div>
+          <div class="p-line"></div>
+          <div class="p-small">Aclaración:</div>
+        </div>
+
+        <div class="p-firma-box">
+          <div><b>Verificador</b></div>
+          <div class="p-line"></div>
+          <div class="p-small">Aclaración:</div>
+        </div>
+      </div>
+      <div class="p-right p-small" style="margin-top:8px;"><b>Fecha:</b> ${esc(fecha)}</div>
+    `;
+  }
+
   function imprimirTodo(){
     const fecha = new Date().toLocaleDateString("es-AR");
     let html = `<div class="print-page">`;
@@ -636,17 +667,10 @@
     html += `<div class="p-title">REGISTRO PCC 1 - ${esc(fecha)}</div>`;
     html += `
       <table class="p-table">
-        <thead>
-          <tr><th>Garrón</th><th>Hora</th><th>0/1</th><th>Resp</th></tr>
-        </thead>
+        <thead><tr><th>Garrón</th><th>Hora</th><th>0/1</th><th>Resp</th></tr></thead>
         <tbody>
           ${data.map(d=>`
-            <tr>
-              <td>${esc(d.g)}</td>
-              <td>${esc(d.h)}</td>
-              <td>${esc(d.b)}</td>
-              <td>${esc(d.r)}</td>
-            </tr>
+            <tr><td>${esc(d.g)}</td><td>${esc(d.h)}</td><td>${esc(d.b)}</td><td>${esc(d.r)}</td></tr>
           `).join("")}
         </tbody>
       </table>
@@ -666,27 +690,24 @@
         <tbody>
           ${devs.map(d=>`
             <tr>
-              <td>${esc(d.g)}</td>
-              <td>${esc(d.lado)}</td>
-              <td>${esc(d.ubicacion)}</td>
-              <td>${esc(d.h)}</td>
-              <td>${esc(d.accionCorrectiva)}</td>
-              <td>${esc(d.horaCorreccion)}</td>
-              <td>${esc(d.restablecimiento)}</td>
-              <td>${esc(d.preventiva)}</td>
-              <td>${esc(d.encargado)}</td>
+              <td>${esc(d.g)}</td><td>${esc(d.lado)}</td><td>${esc(d.ubicacion)}</td><td>${esc(d.h)}</td>
+              <td>${esc(d.accionCorrectiva)}</td><td>${esc(d.horaCorreccion)}</td><td>${esc(d.restablecimiento)}</td>
+              <td>${esc(d.preventiva)}</td><td>${esc(d.encargado)}</td>
             </tr>
           `).join("")}
         </tbody>
       </table>
     `;
 
+    // ✅ Agregamos firmas al final
+    html += firmasHTML();
+
     html += `</div>`;
     document.getElementById("print-replica").innerHTML = html;
     setTimeout(()=>window.print(), 200);
   }
 
-  // ====== INIT ======
+  // INIT
   loadAll();
   capTime();
   updateGarron();
