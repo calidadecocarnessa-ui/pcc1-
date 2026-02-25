@@ -63,9 +63,10 @@
     }
     textarea{ resize:vertical; min-height:70px; }
 
+    /* checkbox discreto sin texto */
     .switchline{
-      display:flex; align-items:center; gap:10px; margin-top:6px;
-      font-size:12px; color:var(--muted); font-weight:900;
+      display:flex; align-items:center; gap:8px;
+      margin-top:6px;
     }
 
     .table-container{
@@ -86,14 +87,6 @@
     .mini.red{ background:var(--red); }
     .mini:disabled{ opacity:.35; cursor:not-allowed; }
 
-    .badge{
-      display:inline-block; padding:4px 10px; border-radius:999px;
-      font-weight:900; font-size:12px;
-      background:#e2e8f0; color:#0f172a;
-    }
-    .badge.lock{ background:#fee2e2; color:#7f1d1d; }
-    .badge.edit{ background:#dcfce7; color:#14532d; }
-
     .cell-inp{ padding:6px 8px; border-radius:10px; border:1px solid var(--border); font-size:13px; }
     .cell-sel{ padding:6px 8px; border-radius:10px; border:1px solid var(--border); font-size:13px; background:#fff; }
 
@@ -102,7 +95,6 @@
       .tabs, .toolbar, .card-entry, .table-container { display:none !important; }
       #print-replica{ display:block !important; }
       body > .encabezado{ display:none !important; }
-
       @page{ size:A4 landscape; margin:0.6cm; }
 
       .p-table{ width:100%; border-collapse:collapse; table-layout:fixed; }
@@ -175,19 +167,14 @@
 
     <div class="row">
       <label>GARRÓN</label>
-      <!-- ✅ editable -->
-      <input id="inG" inputmode="numeric" placeholder="Ej: 51">
+      <input id="inG" inputmode="numeric" placeholder="(auto)">
     </div>
 
     <div class="row">
       <label>HORA</label>
       <input type="time" id="inH" step="60">
       <div class="switchline">
-        <span>Bloqueo</span>
-        <input type="checkbox" id="lockMode">
-        <!-- ✅ discretos (vacíos) -->
-        <span id="lockTxt"></span>
-        <span id="lockBadge" class="badge"></span>
+        <input type="checkbox" id="lockMode" title=" ">
       </div>
     </div>
 
@@ -209,6 +196,8 @@
         <option value="DE">DE</option>
         <option value="AA">AA</option>
       </select>
+
+      <button type="button" id="btnAgregar" class="mini" style="background: var(--green); margin-top:8px;">+ CARGAR</button>
     </div>
   </div>
 
@@ -227,7 +216,7 @@
             <th>Hora</th>
             <th>0/1</th>
             <th>Resp</th>
-            <th style="width:110px;">Borrar</th>
+            <th id="thBorrar" style="width:110px;">Borrar</th>
           </tr>
         </thead>
         <tbody id="tbReg"></tbody>
@@ -262,7 +251,7 @@
           <tr>
             <th style="width:150px;">Fecha</th>
             <th style="width:110px;">Registros</th>
-            <th style="width:160px;">Estado</th>
+            <th style="width:140px;">Estado</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -274,39 +263,39 @@
   <div id="print-replica"></div>
 
 <script>
-  const LS_DAYDATE = "pcc1_daydate_v7";
-  const LS_DAY     = "pcc1_day_v7";
-  const LS_FINAL   = "pcc1_final_v7";
-  const LS_LOCK    = "pcc1_lock_v7";
+  const LS_DAYDATE = "pcc1_daydate_v9";
+  const LS_DAY     = "pcc1_day_v9";
+  const LS_FINAL   = "pcc1_final_v9";
+  const LS_LOCK    = "pcc1_lock_v9";
 
-  var data = [];
-  var finalizados = [];
-  var dayDate = "";
+  let data = [];
+  let finalizados = [];
+  let dayDate = "";
 
-  var elLogo = document.getElementById("logoImg");
-  var btnHora = document.getElementById("btnHora");
-  var btnPDF = document.getElementById("btnPDF");
-  var btnFinalizar = document.getElementById("btnFinalizar");
-  var btnBorrar = document.getElementById("btnBorrar");
+  const elLogo = document.getElementById("logoImg");
+  const btnHora = document.getElementById("btnHora");
+  const btnPDF = document.getElementById("btnPDF");
+  const btnFinalizar = document.getElementById("btnFinalizar");
+  const btnBorrar = document.getElementById("btnBorrar");
+  const btnAgregar = document.getElementById("btnAgregar");
 
-  var inpDayDate = document.getElementById("dayDate");
-  var inG = document.getElementById("inG");
-  var inH = document.getElementById("inH");
-  var inB = document.getElementById("inB");
-  var inR = document.getElementById("inR");
+  const inpDayDate = document.getElementById("dayDate");
+  const inG = document.getElementById("inG");
+  const inH = document.getElementById("inH");
+  const inB = document.getElementById("inB");
+  const inR = document.getElementById("inR");
+  const lockMode = document.getElementById("lockMode");
 
-  var lockMode = document.getElementById("lockMode");
-  var lockTxt = document.getElementById("lockTxt");
-  var lockBadge = document.getElementById("lockBadge");
+  const tbReg = document.getElementById("tbReg");
+  const tbAcc = document.getElementById("tbAcc");
+  const tbFinal = document.getElementById("tbFinal");
+  const thBorrar = document.getElementById("thBorrar");
 
-  var tbReg = document.getElementById("tbReg");
-  var tbAcc = document.getElementById("tbAcc");
-  var tbFinal = document.getElementById("tbFinal");
-
+  // logo fallback
   (function(){
     if(!elLogo) return;
-    var candidates = ["logo.jpg","logo.jpeg","logo.png","logo.jpg.jpeg","LOGO.jpg","LOGO.JPG","Logo.jpg"];
-    var i=0;
+    const candidates = ["logo.jpg","logo.jpeg","logo.png","logo.jpg.jpeg","LOGO.jpg","LOGO.JPG","Logo.jpg"];
+    let i=0;
     elLogo.onerror = function(){
       i++;
       if(i < candidates.length) elLogo.src = candidates[i];
@@ -325,32 +314,65 @@
   }
 
   function nowHHMM(){
-    var d = new Date();
-    var hh = String(d.getHours()); if(hh.length<2) hh="0"+hh;
-    var mm = String(d.getMinutes()); if(mm.length<2) mm="0"+mm;
+    const d = new Date();
+    const hh = String(d.getHours()).padStart(2,"0");
+    const mm = String(d.getMinutes()).padStart(2,"0");
     return hh + ":" + mm;
   }
-  function todayISO(){
-    return new Date().toISOString().slice(0,10);
-  }
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
   function capTime(){ inH.value = nowHHMM(); }
 
   function isLocked(){ return !!lockMode.checked; }
 
-  // ✅ Discreto: no muestra "Editable/Bloqueado"
+  // ✅ CAMBIO: En auditoría se bloquea fecha/garrón/hora, pero NO desvío ni resp
   function setLockUI(){
-    lockTxt.textContent = "";
-    lockBadge.textContent = "";
-    lockBadge.className = "badge";
-    inH.disabled = isLocked();     // en bloqueo: hora no editable
-    inG.disabled = isLocked();     // en bloqueo: garrón no editable
+    const locked = isLocked();
+
+    // Bloquear SOLO lo que no querés tocar en auditoría
+    inpDayDate.disabled = locked;
+    inG.disabled = locked;
+    inH.disabled = locked;
+
+    // NO bloquear estos (siempre se pueden)
+    inB.disabled = false;
+    inR.disabled = false;
+
+    // ocultar columna y botones de borrar en tabla cuando locked
+    thBorrar.style.display = locked ? "none" : "";
+
+    // ✅ si activan auditoría: arrancar en 1 y hora del dispositivo
+    if(locked){
+      capTime();
+      inG.value = "1";
+    }else{
+      // al volver a diaria, sugerir siguiente
+      inG.value = "";
+      updateGarron();
+    }
+
+    renderAll();
   }
 
-  // ✅ No pisar si el usuario está escribiendo o ya puso un valor
+  // ✅ CAMBIO: garrón en auditoría = data.length + 1 (1..N)
+  function nextGarronNumber(){
+    if(isLocked()){
+      return data.length + 1;
+    }
+    // diaria: max garrón + 1 (por si editan)
+    let maxG = 0;
+    for(const d of data){
+      const n = Number(d.g);
+      if(Number.isFinite(n) && n > maxG) maxG = n;
+    }
+    return maxG + 1;
+  }
+
   function updateGarron(){
+    // NO pisar si el usuario está escribiendo
     if(document.activeElement === inG) return;
-    if(String(inG.value || "").trim() !== "") return;
-    inG.value = String(data.length + 1);
+    if((inG.value || "").trim() === ""){
+      inG.value = String(nextGarronNumber());
+    }
   }
 
   function loadAll(){
@@ -365,7 +387,6 @@
     }catch(e){ finalizados = []; }
 
     lockMode.checked = (localStorage.getItem(LS_LOCK) === "1");
-    setLockUI();
 
     dayDate = localStorage.getItem(LS_DAYDATE) || "";
     if(!dayDate) dayDate = todayISO();
@@ -381,19 +402,17 @@
     saveDayDate();
   });
 
-  var tabBtns = document.querySelectorAll(".tab-btn");
-  for(var i=0;i<tabBtns.length;i++){
-    tabBtns[i].addEventListener("click", function(){
-      for(var j=0;j<tabBtns.length;j++) tabBtns[j].classList.remove("active");
-      var tabs = document.querySelectorAll(".tab-content");
-      for(var k=0;k<tabs.length;k++) tabs[k].classList.remove("active");
-
+  // tabs
+  document.querySelectorAll(".tab-btn").forEach(btn=>{
+    btn.addEventListener("click", function(){
+      document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(t=>t.classList.remove("active"));
       this.classList.add("active");
-      var id = this.getAttribute("data-tab");
+      const id = this.getAttribute("data-tab");
       document.getElementById(id).classList.add("active");
       if(id === "tab3") renderFinalizados();
     });
-  }
+  });
 
   btnHora.addEventListener("click", capTime);
   btnPDF.addEventListener("click", imprimirTodo);
@@ -402,32 +421,32 @@
   lockMode.addEventListener("change", function(){
     localStorage.setItem(LS_LOCK, lockMode.checked ? "1" : "0");
     setLockUI();
-    renderAll();
+    if(isLocked()) capTime();
   });
 
   btnBorrar.addEventListener("click", function(){
     if(!confirm("¿Borrar todo el día actual en este dispositivo?")) return;
     data = [];
     saveDay();
-    inG.value = "";
     updateGarron();
     renderAll();
   });
 
-  // ✅ Guardar cuando elegís RESP: respeta garrón manual
-  inR.addEventListener("change", function(){
-    var resp = (inR.value || "").trim().toUpperCase();
-    if(!resp) return;
+  function addRow(){
+    const resp = (inR.value || "").trim().toUpperCase();
+    if(!resp){
+      alert("Falta RESP");
+      return;
+    }
 
-    // en bloqueo: hora automática del dispositivo
+    // auditoría (locked): hora in situ del dispositivo SIEMPRE al guardar
     if(isLocked()) capTime();
 
-    var gManual = String(inG.value || "").trim();
-    var gFinal = gManual ? Number(gManual) : (data.length + 1);
-    if(!isFinite(gFinal) || gFinal <= 0) gFinal = (data.length + 1);
+    let gNum = Number((inG.value || "").trim());
+    if(!Number.isFinite(gNum) || gNum <= 0) gNum = nextGarronNumber();
 
     data.push({
-      g: gFinal,
+      g: gNum,
       h: inH.value || "",
       b: inB.value || "0",
       r: resp,
@@ -442,23 +461,30 @@
       enc:""
     });
 
-    inR.value = "";
     saveDay();
 
-    // dejar libre y sugerir próximo
+    // pasar al siguiente garrón siempre
     inG.value = "";
     updateGarron();
 
-    renderAll();
-    if(isLocked()) capTime();
-  });
+    // dejar RESP en "-" para la próxima
+    inR.value = "";
 
+    // en auditoría dejar la hora del dispositivo para el siguiente
+    if(isLocked()) capTime();
+
+    renderAll();
+  }
+
+  btnAgregar.addEventListener("click", addRow);
+
+  // editar / borrar filas (solo diaria)
   window.updRow = function(idx, field, value){
     if(isLocked()) return;
 
     if(field === "g"){
-      var n = Number(value);
-      if(!isFinite(n) || n <= 0) return;
+      const n = Number(value);
+      if(!Number.isFinite(n) || n <= 0) return;
       data[idx].g = n;
     } else if(field === "b"){
       if(value !== "0" && value !== "1") return;
@@ -469,7 +495,7 @@
       data[idx].h = value || "";
     }
     saveDay();
-    renderAcciones();
+    renderAll();
   };
 
   window.deleteRow = function(idx){
@@ -477,134 +503,136 @@
     if(!confirm("¿Borrar esta fila?")) return;
     data.splice(idx,1);
     saveDay();
-    inG.value = "";
     updateGarron();
     renderAll();
   };
 
   window.saveField = function(idx, field, value){
+    if(isLocked()) return;
     data[idx][field] = value;
     saveDay();
   };
 
   function renderRegistro(){
-    var locked = isLocked();
+    const locked = isLocked();
 
-    tbReg.innerHTML = data.map(function(d,idx){
+    tbReg.innerHTML = data.map((d,idx)=>{
       if(locked){
-        return ''
-        + '<tr>'
-        + '<td>'+esc(d.g)+'</td>'
-        + '<td>'+esc(d.h)+'</td>'
-        + '<td>'+esc(d.b)+'</td>'
-        + '<td>'+esc(d.r)+'</td>'
-        + '<td><button class="mini red" disabled>🗑️</button></td>'
-        + '</tr>';
+        return `
+          <tr>
+            <td>${esc(d.g)}</td>
+            <td>${esc(d.h)}</td>
+            <td>${esc(d.b)}</td>
+            <td>${esc(d.r)}</td>
+          </tr>
+        `;
       }
 
-      return ''
-      + '<tr>'
-      + '<td><input class="cell-inp" inputmode="numeric" value="'+escAttr(d.g)+'" oninput="updRow('+idx+',\'g\',this.value)"></td>'
-      + '<td><input class="cell-inp" type="time" step="60" value="'+escAttr(d.h)+'" onchange="updRow('+idx+',\'h\',this.value)"></td>'
-      + '<td>'
-      + '  <select class="cell-sel" onchange="updRow('+idx+',\'b\',this.value)">'
-      + '    <option value="0" '+(d.b==="0"?"selected":"")+'>0</option>'
-      + '    <option value="1" '+(d.b==="1"?"selected":"")+'>1</option>'
-      + '  </select>'
-      + '</td>'
-      + '<td>'
-      + '  <select class="cell-sel" onchange="updRow('+idx+',\'r\',this.value)">'
-      + '    <option value="" '+(!d.r?"selected":"")+'>-</option>'
-      + '    <option value="MQ" '+(d.r==="MQ"?"selected":"")+'>MQ</option>'
-      + '    <option value="MD" '+(d.r==="MD"?"selected":"")+'>MD</option>'
-      + '    <option value="WC" '+(d.r==="WC"?"selected":"")+'>WC</option>'
-      + '    <option value="DE" '+(d.r==="DE"?"selected":"")+'>DE</option>'
-      + '    <option value="AA" '+(d.r==="AA"?"selected":"")+'>AA</option>'
-      + '  </select>'
-      + '</td>'
-      + '<td><button class="mini red" onclick="deleteRow('+idx+')">🗑️</button></td>'
-      + '</tr>';
+      return `
+        <tr>
+          <td><input class="cell-inp" inputmode="numeric" value="${escAttr(d.g)}" oninput="updRow(${idx},'g',this.value)"></td>
+          <td><input class="cell-inp" type="time" step="60" value="${escAttr(d.h)}" onchange="updRow(${idx},'h',this.value)"></td>
+          <td>
+            <select class="cell-sel" onchange="updRow(${idx},'b',this.value)">
+              <option value="0" ${d.b==="0"?"selected":""}>0</option>
+              <option value="1" ${d.b==="1"?"selected":""}>1</option>
+            </select>
+          </td>
+          <td>
+            <select class="cell-sel" onchange="updRow(${idx},'r',this.value)">
+              <option value="" ${!d.r?"selected":""}>-</option>
+              <option value="MQ" ${d.r==="MQ"?"selected":""}>MQ</option>
+              <option value="MD" ${d.r==="MD"?"selected":""}>MD</option>
+              <option value="WC" ${d.r==="WC"?"selected":""}>WC</option>
+              <option value="DE" ${d.r==="DE"?"selected":""}>DE</option>
+              <option value="AA" ${d.r==="AA"?"selected":""}>AA</option>
+            </select>
+          </td>
+          <td style="display:${locked?"none":""}">
+            <button class="mini red" onclick="deleteRow(${idx})">🗑️</button>
+          </td>
+        </tr>
+      `;
     }).join("");
   }
 
   function renderAcciones(){
-    var devs = [];
-    for(var i=0;i<data.length;i++){
-      if(data[i].b === "1") devs.push({d:data[i], idx:i});
-    }
+    const devs = data.map((d,idx)=>({d,idx})).filter(x=>x.d.b==="1");
 
     if(devs.length === 0){
-      tbAcc.innerHTML = '<tr><td colspan="8" style="text-align:left;color:#64748b;">Sin desvíos (1).</td></tr>';
+      tbAcc.innerHTML = `<tr><td colspan="8" style="text-align:left;color:#64748b;">Sin desvíos (1).</td></tr>`;
       return;
     }
 
-    tbAcc.innerHTML = devs.map(function(x){
-      var d = x.d, idx = x.idx;
+    const dis = ""; // SIEMPRE editable
 
-      return ''
-      + '<tr>'
-      + '<td class="left">'
-      + '  <div><b>Garrón '+esc(d.g)+'</b></div>'
-      + '  <div style="margin-top:8px; display:grid; gap:6px;">'
-      + '    <select onchange="saveField('+idx+',\'lado\',this.value)">'
-      + '      <option value="">Lado</option>'
-      + '      <option value="Izquierdo" '+(d.lado==="Izquierdo"?"selected":"")+'>Izquierdo</option>'
-      + '      <option value="Derecho" '+(d.lado==="Derecho"?"selected":"")+'>Derecho</option>'
-      + '    </select>'
-      + '    <select onchange="saveField('+idx+',\'ubicacion\',this.value)">'
-      + '      <option value="">Ubicación</option>'
-      + '      <option value="Garrón" '+(d.ubicacion==="Garrón"?"selected":"")+'>Garrón</option>'
-      + '      <option value="Culata" '+(d.ubicacion==="Culata"?"selected":"")+'>Culata</option>'
-      + '      <option value="Nalga - Bola de lomo" '+(d.ubicacion==="Nalga - Bola de lomo"?"selected":"")+'>Nalga - Bola de lomo</option>'
-      + '      <option value="Bifes - Cuadril" '+(d.ubicacion==="Bifes - Cuadril"?"selected":"")+'>Bifes - Cuadril</option>'
-      + '      <option value="Pecho - Matambre - Ijada" '+(d.ubicacion==="Pecho - Matambre - Ijada"?"selected":"")+'>Pecho - Matambre - Ijada</option>'
-      + '      <option value="Lomo - Costillas" '+(d.ubicacion==="Lomo - Costillas"?"selected":"")+'>Lomo - Costillas</option>'
-      + '      <option value="Brazuelo - Cogote" '+(d.ubicacion==="Brazuelo - Cogote"?"selected":"")+'>Brazuelo - Cogote</option>'
-      + '      <option value="Marucha - Paleta" '+(d.ubicacion==="Marucha - Paleta"?"selected":"")+'>Marucha - Paleta</option>'
-      + '      <option value="Vacío - Entraña" '+(d.ubicacion==="Vacío - Entraña"?"selected":"")+'>Vacío - Entraña</option>'
-      + '    </select>'
-      + '  </div>'
-      + '</td>'
-      + '<td>'+esc(d.h || "")+'</td>'
-      + '<td><input type="date" value="'+escAttr(d.fechaDesvio)+'" onchange="saveField('+idx+',\'fechaDesvio\',this.value)"></td>'
-      + '<td><textarea oninput="saveField('+idx+',\'descDesvio\',this.value)">'+esc(d.descDesvio)+'</textarea></td>'
-      + '<td><textarea oninput="saveField('+idx+',\'nc\',this.value)">'+esc(d.nc)+'</textarea></td>'
-      + '<td><textarea oninput="saveField('+idx+',\'ac\',this.value)">'+esc(d.ac)+'</textarea></td>'
-      + '<td><textarea oninput="saveField('+idx+',\'ap\',this.value)">'+esc(d.ap)+'</textarea></td>'
-      + '<td><input value="'+escAttr(d.enc)+'" oninput="saveField('+idx+',\'enc\',this.value)"></td>'
-      + '</tr>';
+    tbAcc.innerHTML = devs.map(x=>{
+      const d = x.d, idx = x.idx;
+
+      return `
+        <tr>
+          <td class="left">
+            <div><b>Garrón ${esc(d.g)}</b></div>
+            <div style="margin-top:8px; display:grid; gap:6px;">
+              <select ${dis} onchange="saveField(${idx},'lado',this.value)">
+                <option value="">Lado</option>
+                <option value="Izquierdo" ${d.lado==="Izquierdo"?"selected":""}>Izquierdo</option>
+                <option value="Derecho" ${d.lado==="Derecho"?"selected":""}>Derecho</option>
+              </select>
+              <select ${dis} onchange="saveField(${idx},'ubicacion',this.value)">
+                <option value="">Ubicación</option>
+                <option value="Garrón" ${d.ubicacion==="Garrón"?"selected":""}>Garrón</option>
+                <option value="Culata" ${d.ubicacion==="Culata"?"selected":""}>Culata</option>
+                <option value="Nalga - Bola de lomo" ${d.ubicacion==="Nalga - Bola de lomo"?"selected":""}>Nalga - Bola de lomo</option>
+                <option value="Bifes - Cuadril" ${d.ubicacion==="Bifes - Cuadril"?"selected":""}>Bifes - Cuadril</option>
+                <option value="Pecho - Matambre - Ijada" ${d.ubicacion==="Pecho - Matambre - Ijada"?"selected":""}>Pecho - Matambre - Ijada</option>
+                <option value="Lomo - Costillas" ${d.ubicacion==="Lomo - Costillas"?"selected":""}>Lomo - Costillas</option>
+                <option value="Brazuelo - Cogote" ${d.ubicacion==="Brazuelo - Cogote"?"selected":""}>Brazuelo - Cogote</option>
+                <option value="Marucha - Paleta" ${d.ubicacion==="Marucha - Paleta"?"selected":""}>Marucha - Paleta</option>
+                <option value="Vacío - Entraña" ${d.ubicacion==="Vacío - Entraña"?"selected":""}>Vacío - Entraña</option>
+              </select>
+            </div>
+          </td>
+          <td>${esc(d.h || "")}</td>
+          <td><input type="date" ${dis} value="${escAttr(d.fechaDesvio)}" onchange="saveField(${idx},'fechaDesvio',this.value)"></td>
+          <td><textarea ${dis} oninput="saveField(${idx},'descDesvio',this.value)">${esc(d.descDesvio)}</textarea></td>
+          <td><textarea ${dis} oninput="saveField(${idx},'nc',this.value)">${esc(d.nc)}</textarea></td>
+          <td><textarea ${dis} oninput="saveField(${idx},'ac',this.value)">${esc(d.ac)}</textarea></td>
+          <td><textarea ${dis} oninput="saveField(${idx},'ap',this.value)">${esc(d.ap)}</textarea></td>
+          <td><input ${dis} value="${escAttr(d.enc)}" oninput="saveField(${idx},'enc',this.value)"></td>
+        </tr>
+      `;
     }).join("");
   }
 
   function renderFinalizados(){
     if(!finalizados.length){
-      tbFinal.innerHTML = '<tr><td colspan="4" style="text-align:left; color:#64748b;">Sin días finalizados.</td></tr>';
+      tbFinal.innerHTML = `<tr><td colspan="4" style="text-align:left; color:#64748b;">Sin días finalizados.</td></tr>`;
       return;
     }
 
-    tbFinal.innerHTML = finalizados.map(function(d,i){
-      var estado = d.locked ? '<span class="badge lock">Bloqueado</span>' : '<span class="badge edit">Editable</span>';
-      var btnEditar = d.locked
-        ? '<button class="mini" disabled>Editar</button>'
-        : '<button class="mini" onclick="cargarDia('+i+')">Editar</button>';
+    tbFinal.innerHTML = finalizados.map((d,i)=>{
+      const estado = d.locked ? "OK" : "OK";
+      const btnEditar = d.locked
+        ? `<button class="mini" disabled>Editar</button>`
+        : `<button class="mini" onclick="cargarDia(${i})">Editar</button>`;
 
-      return ''
-      + '<tr>'
-      + '<td><b>'+esc(d.fecha)+'</b></td>'
-      + '<td>'+(d.datos||[]).length+'</td>'
-      + '<td>'+estado+'</td>'
-      + '<td class="left">'
-      + btnEditar
-      + ' <button class="mini" onclick="pdfDia('+i+')">PDF</button>'
-      + ' <button class="mini" onclick="toggleLockDia('+i+')">'+(d.locked ? 'Editable' : 'Bloqueado')+'</button>'
-      + ' <button class="mini red" onclick="borrarDia('+i+')">Borrar</button>'
-      + '</td>'
-      + '</tr>';
+      return `
+        <tr>
+          <td><b>${esc(d.fecha)}</b></td>
+          <td>${(d.datos||[]).length}</td>
+          <td>${esc(estado)}</td>
+          <td class="left">
+            ${btnEditar}
+            <button class="mini" onclick="pdfDia(${i})">PDF</button>
+            <button class="mini red" onclick="borrarDia(${i})">Borrar</button>
+          </td>
+        </tr>
+      `;
     }).join("");
   }
 
   function renderAll(){
-    setLockUI();
     renderRegistro();
     renderAcciones();
   }
@@ -613,13 +641,13 @@
     if(!data.length){ alert("No hay registros."); return; }
     if(!dayDate){ alert("Falta la fecha del día."); return; }
 
-    var snap = {
+    const snap = {
       fecha: dayDate,
       locked: isLocked(),
       savedAt: new Date().toISOString(),
       datos: JSON.parse(JSON.stringify(data))
     };
-    finalizados = finalizados.filter(function(x){ return x.fecha !== dayDate; });
+    finalizados = finalizados.filter(x=>x.fecha !== dayDate);
     finalizados.unshift(snap);
     saveFinal();
     alert("Día guardado ✅");
@@ -628,7 +656,7 @@
 
   window.cargarDia = function(i){
     if(!finalizados[i]) return;
-    if(finalizados[i].locked){ alert("Bloqueado."); return; }
+    if(finalizados[i].locked){ alert("No editable."); return; }
     data = JSON.parse(JSON.stringify(finalizados[i].datos || []));
     dayDate = finalizados[i].fecha || todayISO();
     inpDayDate.value = dayDate;
@@ -637,9 +665,12 @@
     inG.value = "";
     updateGarron();
     renderAll();
-    var btn = document.querySelector('.tab-btn[data-tab="tab1"]');
-    if(btn) btn.click();
+    document.querySelector('.tab-btn[data-tab="tab1"]').click();
   };
+
+  function saveDay(){ localStorage.setItem(LS_DAY, JSON.stringify(data)); }
+  function saveFinal(){ localStorage.setItem(LS_FINAL, JSON.stringify(finalizados)); }
+  function saveDayDate(){ localStorage.setItem(LS_DAYDATE, dayDate); }
 
   window.borrarDia = function(i){
     if(!finalizados[i]) return;
@@ -649,16 +680,9 @@
     renderFinalizados();
   };
 
-  window.toggleLockDia = function(i){
-    if(!finalizados[i]) return;
-    finalizados[i].locked = !finalizados[i].locked;
-    saveFinal();
-    renderFinalizados();
-  };
-
   window.pdfDia = function(i){
     if(!finalizados[i]) return;
-    var prevData = data, prevDate = dayDate;
+    const prevData = data, prevDate = dayDate;
     data = JSON.parse(JSON.stringify(finalizados[i].datos || []));
     dayDate = finalizados[i].fecha || prevDate;
     imprimirTodo();
@@ -667,84 +691,80 @@
   };
 
   function headerPrintHTML(){
-    return ''
-    + '<div class="encabezado-print">'
-    + '<table><tr>'
-    + '<td class="logo"><img src="logo.jpg" onerror="this.onerror=null;this.src=\\'logo.png\\';" alt="Logo"></td>'
-    + '<td class="titulo"><strong>SISTEMA DE GESTIÓN DE CALIDAD</strong><br>INSPECCIÓN DE CARCASAS ANTES DEL LAVADO<br>'
-    + '<span style="font-weight:900; color:#0b3d91;">PCC 1 FAENA</span></td>'
-    + '<td class="info">RG-HCCP - PCC - 307/1<br>Emisión: 23/02/2026<br>Rev. 12</td>'
-    + '</tr></table></div>';
+    return `
+      <div class="encabezado-print">
+        <table><tr>
+          <td class="logo"><img src="logo.jpg" onerror="this.onerror=null;this.src='logo.png';" alt="Logo"></td>
+          <td class="titulo"><strong>SISTEMA DE GESTIÓN DE CALIDAD</strong><br>INSPECCIÓN DE CARCASAS ANTES DEL LAVADO<br>
+          <span style="font-weight:900; color:#0b3d91;">PCC 1 FAENA</span></td>
+          <td class="info">RG-HCCP - PCC - 307/1<br>Emisión: 23/02/2026<br>Rev. 12</td>
+        </tr></table>
+      </div>
+    `;
   }
 
   function firmasHTML(){
-    var fecha = new Date().toLocaleDateString("es-AR");
-    return ''
-    + '<div class="p-firmas">'
-    + '  <div class="p-firma-box"><div><b>Analista</b></div><div class="p-line"></div><div class="p-small">Aclaración:</div></div>'
-    + '  <div class="p-firma-box"><div><b>Verificador</b></div><div class="p-line"></div><div class="p-small">Aclaración:</div></div>'
-    + '</div>'
-    + '<div class="p-right p-small" style="margin-top:8px;"><b>Fecha impresión:</b> '+esc(fecha)+'</div>';
+    const fecha = new Date().toLocaleDateString("es-AR");
+    return `
+      <div class="p-firmas">
+        <div class="p-firma-box"><div><b>Analista</b></div><div class="p-line"></div><div class="p-small">Aclaración:</div></div>
+        <div class="p-firma-box"><div><b>Verificador</b></div><div class="p-line"></div><div class="p-small">Aclaración:</div></div>
+      </div>
+      <div class="p-right p-small" style="margin-top:8px;"><b>Fecha impresión:</b> ${esc(fecha)}</div>
+    `;
   }
 
   function imprimirTodo(){
-    var html = '<div class="print-page">';
+    let html = '<div class="print-page">';
     html += headerPrintHTML();
-    html += '<div class="p-title">REGISTRO PCC 1 - '+esc(dayDate || "")+'</div>';
-    html += ''
-      + '<table class="p-table">'
-      + '<thead><tr><th>Garrón</th><th>Hora</th><th>0/1</th><th>Resp</th></tr></thead>'
-      + '<tbody>'
-      + data.map(function(d){
-          return '<tr><td>'+esc(d.g)+'</td><td>'+esc(d.h)+'</td><td>'+esc(d.b)+'</td><td>'+esc(d.r)+'</td></tr>';
-        }).join("")
-      + '</tbody></table>';
+    html += `<div class="p-title">REGISTRO PCC 1 - ${esc(dayDate || "")}</div>`;
+    html += `
+      <table class="p-table">
+        <thead><tr><th>Garrón</th><th>Hora</th><th>0/1</th><th>Resp</th></tr></thead>
+        <tbody>
+          ${data.map(d=>`<tr><td>${esc(d.g)}</td><td>${esc(d.h)}</td><td>${esc(d.b)}</td><td>${esc(d.r)}</td></tr>`).join("")}
+        </tbody>
+      </table>
+    `;
 
-    var devs = data.filter(function(d){ return d.b==="1"; });
-
+    const devs = data.filter(d=>d.b==="1");
     html += headerPrintHTML();
-    html += '<div class="p-title">ACCIONES</div>';
-    html += ''
-      + '<table class="p-table">'
-      + '<thead>'
-      + '<tr>'
-      + '<th>Garrón</th><th>Lado</th><th>Ubicación</th><th>Hora</th>'
-      + '<th>Fecha</th><th>Descripción del desvío</th>'
-      + '<th>No conformidad</th><th>Acción correctiva</th><th>Acción preventiva</th><th>Encargado</th>'
-      + '</tr>'
-      + '</thead>'
-      + '<tbody>'
-      + devs.map(function(d){
-          return ''
-          + '<tr>'
-          + '<td>'+esc(d.g)+'</td>'
-          + '<td>'+esc(d.lado)+'</td>'
-          + '<td>'+esc(d.ubicacion)+'</td>'
-          + '<td>'+esc(d.h)+'</td>'
-          + '<td>'+esc(d.fechaDesvio)+'</td>'
-          + '<td>'+esc(d.descDesvio)+'</td>'
-          + '<td>'+esc(d.nc)+'</td>'
-          + '<td>'+esc(d.ac)+'</td>'
-          + '<td>'+esc(d.ap)+'</td>'
-          + '<td>'+esc(d.enc)+'</td>'
-          + '</tr>';
-        }).join("")
-      + '</tbody></table>';
+    html += `<div class="p-title">ACCIONES</div>`;
+    html += `
+      <table class="p-table">
+        <thead>
+          <tr>
+            <th>Garrón</th><th>Lado</th><th>Ubicación</th><th>Hora</th>
+            <th>Fecha</th><th>Descripción del desvío</th>
+            <th>No conformidad</th><th>Acción correctiva</th><th>Acción preventiva</th><th>Encargado</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${devs.map(d=>`
+            <tr>
+              <td>${esc(d.g)}</td><td>${esc(d.lado)}</td><td>${esc(d.ubicacion)}</td><td>${esc(d.h)}</td>
+              <td>${esc(d.fechaDesvio)}</td><td>${esc(d.descDesvio)}</td><td>${esc(d.nc)}</td>
+              <td>${esc(d.ac)}</td><td>${esc(d.ap)}</td><td>${esc(d.enc)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
 
     html += firmasHTML();
     html += '</div>';
 
     document.getElementById("print-replica").innerHTML = html;
-    setTimeout(function(){ window.print(); }, 200);
+    setTimeout(()=>window.print(), 200);
   }
 
   // INIT
   loadAll();
   capTime();
   updateGarron();
+  setLockUI();
   renderAll();
   renderFinalizados();
 </script>
-
 </body>
 </html>
