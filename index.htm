@@ -168,7 +168,6 @@
   </div>
 
   <div class="card-entry">
-    <!-- ✅ NUEVO: FECHA DEL DÍA -->
     <div class="row">
       <label>FECHA (DÍA DE REGISTRO)</label>
       <input type="date" id="dayDate">
@@ -176,7 +175,8 @@
 
     <div class="row">
       <label>GARRÓN</label>
-      <input id="inG" readonly>
+      <!-- ✅ editable -->
+      <input id="inG" inputmode="numeric" placeholder="Ej: 51">
     </div>
 
     <div class="row">
@@ -185,8 +185,9 @@
       <div class="switchline">
         <span>Bloqueo</span>
         <input type="checkbox" id="lockMode">
-        <span id="lockTxt">Editable</span>
-        <span id="lockBadge" class="badge edit">EDITABLE</span>
+        <!-- ✅ discretos (vacíos) -->
+        <span id="lockTxt"></span>
+        <span id="lockBadge" class="badge"></span>
       </div>
     </div>
 
@@ -336,15 +337,20 @@
 
   function isLocked(){ return !!lockMode.checked; }
 
+  // ✅ Discreto: no muestra "Editable/Bloqueado"
   function setLockUI(){
-    lockTxt.textContent = isLocked() ? "Bloqueado" : "Editable";
-    lockBadge.textContent = isLocked() ? "BLOQUEADO" : "EDITABLE";
-    lockBadge.className = "badge " + (isLocked() ? "lock" : "edit");
-    inH.disabled = isLocked();
+    lockTxt.textContent = "";
+    lockBadge.textContent = "";
+    lockBadge.className = "badge";
+    inH.disabled = isLocked();     // en bloqueo: hora no editable
+    inG.disabled = isLocked();     // en bloqueo: garrón no editable
   }
 
+  // ✅ No pisar si el usuario está escribiendo o ya puso un valor
   function updateGarron(){
-    inG.value = data.length + 1;
+    if(document.activeElement === inG) return;
+    if(String(inG.value || "").trim() !== "") return;
+    inG.value = String(data.length + 1);
   }
 
   function loadAll(){
@@ -403,18 +409,25 @@
     if(!confirm("¿Borrar todo el día actual en este dispositivo?")) return;
     data = [];
     saveDay();
+    inG.value = "";
     updateGarron();
     renderAll();
   });
 
+  // ✅ Guardar cuando elegís RESP: respeta garrón manual
   inR.addEventListener("change", function(){
     var resp = (inR.value || "").trim().toUpperCase();
     if(!resp) return;
 
+    // en bloqueo: hora automática del dispositivo
     if(isLocked()) capTime();
 
+    var gManual = String(inG.value || "").trim();
+    var gFinal = gManual ? Number(gManual) : (data.length + 1);
+    if(!isFinite(gFinal) || gFinal <= 0) gFinal = (data.length + 1);
+
     data.push({
-      g: data.length + 1,
+      g: gFinal,
       h: inH.value || "",
       b: inB.value || "0",
       r: resp,
@@ -431,7 +444,11 @@
 
     inR.value = "";
     saveDay();
+
+    // dejar libre y sugerir próximo
+    inG.value = "";
     updateGarron();
+
     renderAll();
     if(isLocked()) capTime();
   });
@@ -460,6 +477,7 @@
     if(!confirm("¿Borrar esta fila?")) return;
     data.splice(idx,1);
     saveDay();
+    inG.value = "";
     updateGarron();
     renderAll();
   };
@@ -616,6 +634,7 @@
     inpDayDate.value = dayDate;
     saveDayDate();
     saveDay();
+    inG.value = "";
     updateGarron();
     renderAll();
     var btn = document.querySelector('.tab-btn[data-tab="tab1"]');
