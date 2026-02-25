@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PCC1</title>
+  <title>PCC1 - Inspección de Carcasas</title>
 
   <style>
     :root{
@@ -15,7 +15,7 @@
 
     .encabezado table{ width:100%; border-collapse:collapse; background:#fff; margin-bottom:10px; }
     .encabezado td{ border:2px solid #000; padding:8px; vertical-align:middle; }
-    .logo{ width:20%; text-align:center; background:#f3f4f6; }
+    .logo{ width:20%; text-align:center; background:#f3f6ff; }
     .logo img{ max-width:140px; max-height:70px; object-fit:contain; display:block; margin:0 auto; }
     .titulo{ width:60%; text-align:center; font-size:13px; line-height:1.2; }
     .titulo span{ color:#0b3d91; font-weight:700; }
@@ -39,6 +39,7 @@
     .toolbar .sky{ background:var(--sky); }
     .toolbar .green{ background:var(--green); }
     .toolbar .red{ background:var(--red); }
+    .toolbar .gray{ background:var(--gray); }
 
     .card-entry{
       background:var(--card);
@@ -62,9 +63,10 @@
     }
     textarea{ resize:vertical; min-height:70px; }
 
+    /* checkbox discreto sin texto */
     .switchline{
-      display:flex; align-items:center; gap:10px; margin-top:6px;
-      font-size:12px; color:var(--muted); font-weight:900;
+      display:flex; align-items:center; gap:8px;
+      margin-top:6px;
     }
 
     .table-container{
@@ -85,14 +87,6 @@
     .mini.red{ background:var(--red); }
     .mini:disabled{ opacity:.35; cursor:not-allowed; }
 
-    .badge{
-      display:inline-block; padding:4px 10px; border-radius:999px;
-      font-weight:900; font-size:12px;
-      background:#e2e8f0; color:#0f172a;
-    }
-    .badge.ro{ background:#fee2e2; color:#7f1d1d; }
-    .badge.ed{ background:#dcfce7; color:#14532d; }
-
     .cell-inp{ padding:6px 8px; border-radius:10px; border:1px solid var(--border); font-size:13px; }
     .cell-sel{ padding:6px 8px; border-radius:10px; border:1px solid var(--border); font-size:13px; background:#fff; }
 
@@ -101,11 +95,10 @@
       .tabs, .toolbar, .card-entry, .table-container { display:none !important; }
       #print-replica{ display:block !important; }
       body > .encabezado{ display:none !important; }
-
       @page{ size:A4 landscape; margin:0.6cm; }
 
       .p-table{ width:100%; border-collapse:collapse; table-layout:fixed; }
-      .p-table th, .p-table td{ border:1px solid #000; padding:4px; font-size:9pt; }
+      .p-table th, .p-table td{ border:1px solid #000; padding:4px; font-size:9pt; vertical-align:top; }
       .p-table th{ background:#eee; }
       .p-title{ text-align:center; font-weight:900; margin:8px 0 10px; }
 
@@ -116,7 +109,6 @@
       .encabezado-print .titulo{ width:60%; text-align:center; font-size:12px; }
       .encabezado-print .info{ width:20%; text-align:center; font-size:11px; background:#cfefff; }
 
-      /* Firmas */
       .p-firmas{
         margin-top:14px;
         display:flex;
@@ -163,8 +155,50 @@
   <div class="toolbar">
     <button class="sky" type="button" id="btnHora">⏱️ Hora</button>
     <button type="button" id="btnPDF">🖨️ PDF</button>
-    <button class="green" type="button" id="btnFinalizar">✅ Finalizar</button>
-    <button class="red" type="button" id="btnBorrar">🗑️ Borrar</button>
+    <button class="green" type="button" id="btnFinalizar">✅ Finalizar día</button>
+    <button class="red" type="button" id="btnBorrar">🗑️ Borrar día</button>
+  </div>
+
+  <div class="card-entry">
+    <div class="row">
+      <label>FECHA (DÍA DE REGISTRO)</label>
+      <input type="date" id="dayDate">
+    </div>
+
+    <div class="row">
+      <label>GARRÓN</label>
+      <input id="inG" inputmode="numeric" placeholder="(auto)">
+    </div>
+
+    <div class="row">
+      <label>HORA</label>
+      <input type="time" id="inH" step="60">
+      <div class="switchline">
+        <input type="checkbox" id="lockMode" title=" ">
+      </div>
+    </div>
+
+    <div class="row">
+      <label>DESVÍO (0/1)</label>
+      <select id="inB">
+        <option value="0">0</option>
+        <option value="1">1</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label>RESP</label>
+      <select id="inR">
+        <option value="">-</option>
+        <option value="MQ">MQ</option>
+        <option value="MD">MD</option>
+        <option value="WC">WC</option>
+        <option value="DE">DE</option>
+        <option value="AA">AA</option>
+      </select>
+
+      <button type="button" id="btnAgregar" class="mini" style="background: var(--green); margin-top:8px;">+ CARGAR</button>
+    </div>
   </div>
 
   <div class="tabs">
@@ -173,45 +207,7 @@
     <button class="tab-btn" data-tab="tab3">DÍAS FINALIZADOS</button>
   </div>
 
-  <!-- TAB 1 -->
   <div id="tab1" class="tab-content active">
-    <div class="card-entry">
-      <div class="row">
-        <label>GARRÓN</label>
-        <input id="inG" readonly>
-      </div>
-
-      <div class="row">
-        <label>HORA</label>
-        <input type="time" id="inH" step="60">
-        <div class="switchline">
-          <span>Auto hora</span>
-          <input type="checkbox" id="autoHora">
-          <span id="autoTxt">Manual</span>
-        </div>
-      </div>
-
-      <div class="row">
-        <label>DESVÍO (0/1)</label>
-        <select id="inB">
-          <option value="0">0</option>
-          <option value="1">1</option>
-        </select>
-      </div>
-
-      <div class="row">
-        <label>RESP</label>
-        <select id="inR">
-          <option value="">-</option>
-          <option value="MQ">MQ</option>
-          <option value="MD">MD</option>
-          <option value="WC">WC</option>
-          <option value="DE">DE</option>
-          <option value="AA">AA</option>
-        </select>
-      </div>
-    </div>
-
     <div class="table-container">
       <table>
         <thead>
@@ -220,7 +216,7 @@
             <th>Hora</th>
             <th>0/1</th>
             <th>Resp</th>
-            <th style="width:110px;">Borrar</th>
+            <th id="thBorrar" style="width:110px;">Borrar</th>
           </tr>
         </thead>
         <tbody id="tbReg"></tbody>
@@ -228,7 +224,6 @@
     </div>
   </div>
 
-  <!-- TAB 2 -->
   <div id="tab2" class="tab-content">
     <div class="table-container">
       <table>
@@ -236,10 +231,11 @@
           <tr>
             <th>Garrón / Lado / Ubicación</th>
             <th style="width:90px;">Hora</th>
+            <th style="width:130px;">Fecha</th>
+            <th>Descripción del desvío</th>
+            <th>No conformidad</th>
             <th>Acción correctiva</th>
-            <th style="width:110px;">Hora cor.</th>
-            <th>Restablecimiento</th>
-            <th>Preventiva</th>
+            <th>Acción preventiva</th>
             <th style="width:140px;">Encargado</th>
           </tr>
         </thead>
@@ -248,7 +244,6 @@
     </div>
   </div>
 
-  <!-- TAB 3 -->
   <div id="tab3" class="tab-content">
     <div class="table-container">
       <table>
@@ -268,36 +263,40 @@
   <div id="print-replica"></div>
 
 <script>
-  const LS_DAY   = "pcc1_day_v5";
-  const LS_FINAL = "pcc1_final_v5";
-  const LS_AUTO  = "pcc1_auto_v5";
+  const LS_DAYDATE = "pcc1_daydate_v9";
+  const LS_DAY     = "pcc1_day_v9";
+  const LS_FINAL   = "pcc1_final_v9";
+  const LS_LOCK    = "pcc1_lock_v9";
 
   let data = [];
   let finalizados = [];
+  let dayDate = "";
 
   const elLogo = document.getElementById("logoImg");
   const btnHora = document.getElementById("btnHora");
   const btnPDF = document.getElementById("btnPDF");
   const btnFinalizar = document.getElementById("btnFinalizar");
   const btnBorrar = document.getElementById("btnBorrar");
+  const btnAgregar = document.getElementById("btnAgregar");
 
+  const inpDayDate = document.getElementById("dayDate");
   const inG = document.getElementById("inG");
   const inH = document.getElementById("inH");
   const inB = document.getElementById("inB");
   const inR = document.getElementById("inR");
-
-  const autoHora = document.getElementById("autoHora");
-  const autoTxt = document.getElementById("autoTxt");
+  const lockMode = document.getElementById("lockMode");
 
   const tbReg = document.getElementById("tbReg");
   const tbAcc = document.getElementById("tbAcc");
   const tbFinal = document.getElementById("tbFinal");
+  const thBorrar = document.getElementById("thBorrar");
 
+  // logo fallback
   (function(){
     if(!elLogo) return;
-    const candidates = ["logo.jpg","logo.jpeg","logo.png","logo.jpg.jpeg"];
+    const candidates = ["logo.jpg","logo.jpeg","logo.png","logo.jpg.jpeg","LOGO.jpg","LOGO.JPG","Logo.jpg"];
     let i=0;
-    elLogo.onerror = () => {
+    elLogo.onerror = function(){
       i++;
       if(i < candidates.length) elLogo.src = candidates[i];
       else { elLogo.style.display="none"; elLogo.parentNode.innerHTML="<b>LOGO</b>"; }
@@ -306,59 +305,112 @@
   })();
 
   function esc(s){
-    return String(s ?? "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;");
+    s = String(s == null ? "" : s);
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   }
   function escAttr(s){
-    return String(s ?? "")
-      .replaceAll("&","&amp;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;");
+    s = String(s == null ? "" : s);
+    return s.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   }
 
   function nowHHMM(){
     const d = new Date();
-    return String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+    const hh = String(d.getHours()).padStart(2,"0");
+    const mm = String(d.getMinutes()).padStart(2,"0");
+    return hh + ":" + mm;
   }
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
   function capTime(){ inH.value = nowHHMM(); }
-  function isAutoOn(){ return !!autoHora.checked; }
 
-  // Auto hora: bloquea solo el input de hora del alta + edición de fila (pero NO acciones)
-  function setAutoUI(){
-    autoTxt.textContent = isAutoOn() ? "Auto" : "Manual";
-    inH.disabled = isAutoOn();
+  function isLocked(){ return !!lockMode.checked; }
+
+  // ✅ CAMBIO: En auditoría se bloquea fecha/garrón/hora, pero NO desvío ni resp
+  function setLockUI(){
+    const locked = isLocked();
+
+    // Bloquear SOLO lo que no querés tocar en auditoría
+    inpDayDate.disabled = locked;
+    inG.disabled = locked;
+    inH.disabled = locked;
+
+    // NO bloquear estos (siempre se pueden)
+    inB.disabled = false;
+    inR.disabled = false;
+
+    // ocultar columna y botones de borrar en tabla cuando locked
+    thBorrar.style.display = locked ? "none" : "";
+
+    // ✅ si activan auditoría: arrancar en 1 y hora del dispositivo
+    if(locked){
+      capTime();
+      inG.value = "1";
+    }else{
+      // al volver a diaria, sugerir siguiente
+      inG.value = "";
+      updateGarron();
+    }
+
+    renderAll();
   }
 
-  function updateGarron(){ inG.value = data.length + 1; }
+  // ✅ CAMBIO: garrón en auditoría = data.length + 1 (1..N)
+  function nextGarronNumber(){
+    if(isLocked()){
+      return data.length + 1;
+    }
+    // diaria: max garrón + 1 (por si editan)
+    let maxG = 0;
+    for(const d of data){
+      const n = Number(d.g);
+      if(Number.isFinite(n) && n > maxG) maxG = n;
+    }
+    return maxG + 1;
+  }
+
+  function updateGarron(){
+    // NO pisar si el usuario está escribiendo
+    if(document.activeElement === inG) return;
+    if((inG.value || "").trim() === ""){
+      inG.value = String(nextGarronNumber());
+    }
+  }
 
   function loadAll(){
     try{
       data = JSON.parse(localStorage.getItem(LS_DAY) || "[]");
       if(!Array.isArray(data)) data = [];
-    }catch{ data = []; }
+    }catch(e){ data = []; }
 
     try{
       finalizados = JSON.parse(localStorage.getItem(LS_FINAL) || "[]");
       if(!Array.isArray(finalizados)) finalizados = [];
-    }catch{ finalizados = []; }
+    }catch(e){ finalizados = []; }
 
-    autoHora.checked = (localStorage.getItem(LS_AUTO) === "1");
-    setAutoUI();
+    lockMode.checked = (localStorage.getItem(LS_LOCK) === "1");
+
+    dayDate = localStorage.getItem(LS_DAYDATE) || "";
+    if(!dayDate) dayDate = todayISO();
+    inpDayDate.value = dayDate;
   }
+
   function saveDay(){ localStorage.setItem(LS_DAY, JSON.stringify(data)); }
   function saveFinal(){ localStorage.setItem(LS_FINAL, JSON.stringify(finalizados)); }
+  function saveDayDate(){ localStorage.setItem(LS_DAYDATE, dayDate); }
 
-  // Tabs
+  inpDayDate.addEventListener("change", function(){
+    dayDate = inpDayDate.value || todayISO();
+    saveDayDate();
+  });
+
+  // tabs
   document.querySelectorAll(".tab-btn").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
+    btn.addEventListener("click", function(){
       document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
       document.querySelectorAll(".tab-content").forEach(t=>t.classList.remove("active"));
-      btn.classList.add("active");
-      document.getElementById(btn.dataset.tab).classList.add("active");
-      if(btn.dataset.tab === "tab3") renderFinalizados();
+      this.classList.add("active");
+      const id = this.getAttribute("data-tab");
+      document.getElementById(id).classList.add("active");
+      if(id === "tab3") renderFinalizados();
     });
   });
 
@@ -366,13 +418,13 @@
   btnPDF.addEventListener("click", imprimirTodo);
   btnFinalizar.addEventListener("click", finalizarDia);
 
-  autoHora.addEventListener("change", ()=>{
-    localStorage.setItem(LS_AUTO, autoHora.checked ? "1" : "0");
-    setAutoUI();
-    renderRegistro();
+  lockMode.addEventListener("change", function(){
+    localStorage.setItem(LS_LOCK, lockMode.checked ? "1" : "0");
+    setLockUI();
+    if(isLocked()) capTime();
   });
 
-  btnBorrar.addEventListener("click", ()=>{
+  btnBorrar.addEventListener("click", function(){
     if(!confirm("¿Borrar todo el día actual en este dispositivo?")) return;
     data = [];
     saveDay();
@@ -380,38 +432,55 @@
     renderAll();
   });
 
-  // Alta por iniciales
-  inR.addEventListener("change", ()=>{
+  function addRow(){
     const resp = (inR.value || "").trim().toUpperCase();
-    if(!resp) return;
+    if(!resp){
+      alert("Falta RESP");
+      return;
+    }
 
-    if(isAutoOn()) capTime();
+    // auditoría (locked): hora in situ del dispositivo SIEMPRE al guardar
+    if(isLocked()) capTime();
+
+    let gNum = Number((inG.value || "").trim());
+    if(!Number.isFinite(gNum) || gNum <= 0) gNum = nextGarronNumber();
 
     data.push({
-      g: data.length + 1,
+      g: gNum,
       h: inH.value || "",
       b: inB.value || "0",
       r: resp,
 
       lado:"",
       ubicacion:"",
-      accionCorrectiva:"",
-      horaCorreccion:"",
-      restablecimiento:"",
-      preventiva:"",
-      encargado:""
+      fechaDesvio:"",
+      descDesvio:"",
+      nc:"",
+      ac:"",
+      ap:"",
+      enc:""
     });
 
-    inR.value = "";
     saveDay();
-    updateGarron();
-    renderAll();
-    if(isAutoOn()) capTime();
-  });
 
-  // Edición desde tabla
-  function updRow(idx, field, value){
-    if(isAutoOn()) return;
+    // pasar al siguiente garrón siempre
+    inG.value = "";
+    updateGarron();
+
+    // dejar RESP en "-" para la próxima
+    inR.value = "";
+
+    // en auditoría dejar la hora del dispositivo para el siguiente
+    if(isLocked()) capTime();
+
+    renderAll();
+  }
+
+  btnAgregar.addEventListener("click", addRow);
+
+  // editar / borrar filas (solo diaria)
+  window.updRow = function(idx, field, value){
+    if(isLocked()) return;
 
     if(field === "g"){
       const n = Number(value);
@@ -425,22 +494,27 @@
     } else if(field === "h"){
       data[idx].h = value || "";
     }
-
     saveDay();
-    renderAcciones(); // si cambió 0/1, refresca Acciones
-  }
+    renderAll();
+  };
 
-  function deleteRow(idx){
-    if(isAutoOn()) return;
+  window.deleteRow = function(idx){
+    if(isLocked()) return;
     if(!confirm("¿Borrar esta fila?")) return;
     data.splice(idx,1);
     saveDay();
     updateGarron();
     renderAll();
-  }
+  };
+
+  window.saveField = function(idx, field, value){
+    if(isLocked()) return;
+    data[idx][field] = value;
+    saveDay();
+  };
 
   function renderRegistro(){
-    const locked = isAutoOn();
+    const locked = isLocked();
 
     tbReg.innerHTML = data.map((d,idx)=>{
       if(locked){
@@ -450,7 +524,6 @@
             <td>${esc(d.h)}</td>
             <td>${esc(d.b)}</td>
             <td>${esc(d.r)}</td>
-            <td><button class="mini red" disabled>🗑️</button></td>
           </tr>
         `;
       }
@@ -472,42 +545,41 @@
               <option value="MD" ${d.r==="MD"?"selected":""}>MD</option>
               <option value="WC" ${d.r==="WC"?"selected":""}>WC</option>
               <option value="DE" ${d.r==="DE"?"selected":""}>DE</option>
-              <option value="GV" ${d.r==="GV"?"selected":""}>GV</option>
+              <option value="AA" ${d.r==="AA"?"selected":""}>AA</option>
             </select>
           </td>
-          <td><button class="mini red" onclick="deleteRow(${idx})">🗑️</button></td>
+          <td style="display:${locked?"none":""}">
+            <button class="mini red" onclick="deleteRow(${idx})">🗑️</button>
+          </td>
         </tr>
       `;
     }).join("");
   }
 
-  function saveField(idx, field, value){
-    data[idx][field] = value;
-    saveDay();
-  }
-
-  // Acciones (solo para b=1) siempre editables
   function renderAcciones(){
     const devs = data.map((d,idx)=>({d,idx})).filter(x=>x.d.b==="1");
+
     if(devs.length === 0){
-      tbAcc.innerHTML = `<tr><td colspan="7" style="text-align:left;color:#64748b;">Sin desvíos (1).</td></tr>`;
+      tbAcc.innerHTML = `<tr><td colspan="8" style="text-align:left;color:#64748b;">Sin desvíos (1).</td></tr>`;
       return;
     }
 
+    const dis = ""; // SIEMPRE editable
+
     tbAcc.innerHTML = devs.map(x=>{
       const d = x.d, idx = x.idx;
+
       return `
         <tr>
           <td class="left">
             <div><b>Garrón ${esc(d.g)}</b></div>
             <div style="margin-top:8px; display:grid; gap:6px;">
-              <select onchange="saveField(${idx},'lado',this.value)">
+              <select ${dis} onchange="saveField(${idx},'lado',this.value)">
                 <option value="">Lado</option>
                 <option value="Izquierdo" ${d.lado==="Izquierdo"?"selected":""}>Izquierdo</option>
                 <option value="Derecho" ${d.lado==="Derecho"?"selected":""}>Derecho</option>
               </select>
-
-              <select onchange="saveField(${idx},'ubicacion',this.value)">
+              <select ${dis} onchange="saveField(${idx},'ubicacion',this.value)">
                 <option value="">Ubicación</option>
                 <option value="Garrón" ${d.ubicacion==="Garrón"?"selected":""}>Garrón</option>
                 <option value="Culata" ${d.ubicacion==="Culata"?"selected":""}>Culata</option>
@@ -521,19 +593,13 @@
               </select>
             </div>
           </td>
-
           <td>${esc(d.h || "")}</td>
-
-          <td><textarea oninput="saveField(${idx},'accionCorrectiva',this.value)">${esc(d.accionCorrectiva)}</textarea></td>
-
-          <td><input type="time" step="60" value="${escAttr(d.horaCorreccion)}"
-            onchange="saveField(${idx},'horaCorreccion',this.value)"></td>
-
-          <td><textarea oninput="saveField(${idx},'restablecimiento',this.value)">${esc(d.restablecimiento)}</textarea></td>
-
-          <td><textarea oninput="saveField(${idx},'preventiva',this.value)">${esc(d.preventiva)}</textarea></td>
-
-          <td><input value="${escAttr(d.encargado)}" oninput="saveField(${idx},'encargado',this.value)"></td>
+          <td><input type="date" ${dis} value="${escAttr(d.fechaDesvio)}" onchange="saveField(${idx},'fechaDesvio',this.value)"></td>
+          <td><textarea ${dis} oninput="saveField(${idx},'descDesvio',this.value)">${esc(d.descDesvio)}</textarea></td>
+          <td><textarea ${dis} oninput="saveField(${idx},'nc',this.value)">${esc(d.nc)}</textarea></td>
+          <td><textarea ${dis} oninput="saveField(${idx},'ac',this.value)">${esc(d.ac)}</textarea></td>
+          <td><textarea ${dis} oninput="saveField(${idx},'ap',this.value)">${esc(d.ap)}</textarea></td>
+          <td><input ${dis} value="${escAttr(d.enc)}" oninput="saveField(${idx},'enc',this.value)"></td>
         </tr>
       `;
     }).join("");
@@ -544,22 +610,21 @@
       tbFinal.innerHTML = `<tr><td colspan="4" style="text-align:left; color:#64748b;">Sin días finalizados.</td></tr>`;
       return;
     }
+
     tbFinal.innerHTML = finalizados.map((d,i)=>{
-      const estado = d.readOnly
-        ? `<span class="badge ro">Solo lectura</span>`
-        : `<span class="badge ed">Editable</span>`;
-      const btnCargar = d.readOnly
+      const estado = d.locked ? "OK" : "OK";
+      const btnEditar = d.locked
         ? `<button class="mini" disabled>Editar</button>`
         : `<button class="mini" onclick="cargarDia(${i})">Editar</button>`;
+
       return `
         <tr>
           <td><b>${esc(d.fecha)}</b></td>
           <td>${(d.datos||[]).length}</td>
-          <td>${estado}</td>
+          <td>${esc(estado)}</td>
           <td class="left">
-            ${btnCargar}
+            ${btnEditar}
             <button class="mini" onclick="pdfDia(${i})">PDF</button>
-            <button class="mini" onclick="toggleRO(${i})">${d.readOnly ? "Editable" : "Solo lectura"}</button>
             <button class="mini red" onclick="borrarDia(${i})">Borrar</button>
           </td>
         </tr>
@@ -568,110 +633,96 @@
   }
 
   function renderAll(){
-    setAutoUI();
     renderRegistro();
     renderAcciones();
   }
 
-  function finalizeDateISO(){ return new Date().toISOString().slice(0,10); }
-
   function finalizarDia(){
     if(!data.length){ alert("No hay registros."); return; }
-    const fecha = finalizeDateISO();
-    const readOnly = isAutoOn();
-    const snap = { fecha, readOnly, savedAt:new Date().toISOString(), datos: JSON.parse(JSON.stringify(data)) };
-    finalizados = finalizados.filter(x=>x.fecha !== fecha);
+    if(!dayDate){ alert("Falta la fecha del día."); return; }
+
+    const snap = {
+      fecha: dayDate,
+      locked: isLocked(),
+      savedAt: new Date().toISOString(),
+      datos: JSON.parse(JSON.stringify(data))
+    };
+    finalizados = finalizados.filter(x=>x.fecha !== dayDate);
     finalizados.unshift(snap);
     saveFinal();
     alert("Día guardado ✅");
     renderFinalizados();
   }
 
-  function cargarDia(i){
+  window.cargarDia = function(i){
     if(!finalizados[i]) return;
-    if(finalizados[i].readOnly){ alert("Solo lectura."); return; }
+    if(finalizados[i].locked){ alert("No editable."); return; }
     data = JSON.parse(JSON.stringify(finalizados[i].datos || []));
+    dayDate = finalizados[i].fecha || todayISO();
+    inpDayDate.value = dayDate;
+    saveDayDate();
     saveDay();
+    inG.value = "";
     updateGarron();
     renderAll();
+    document.querySelector('.tab-btn[data-tab="tab1"]').click();
+  };
 
-    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
-    document.querySelectorAll(".tab-content").forEach(t=>t.classList.remove("active"));
-    document.querySelector('.tab-btn[data-tab="tab1"]').classList.add("active");
-    document.getElementById("tab1").classList.add("active");
-  }
+  function saveDay(){ localStorage.setItem(LS_DAY, JSON.stringify(data)); }
+  function saveFinal(){ localStorage.setItem(LS_FINAL, JSON.stringify(finalizados)); }
+  function saveDayDate(){ localStorage.setItem(LS_DAYDATE, dayDate); }
 
-  function borrarDia(i){
+  window.borrarDia = function(i){
     if(!finalizados[i]) return;
     if(!confirm("¿Borrar día finalizado?")) return;
     finalizados.splice(i,1);
     saveFinal();
     renderFinalizados();
-  }
+  };
 
-  function toggleRO(i){
+  window.pdfDia = function(i){
     if(!finalizados[i]) return;
-    finalizados[i].readOnly = !finalizados[i].readOnly;
-    saveFinal();
-    renderFinalizados();
-  }
-
-  function pdfDia(i){
-    if(!finalizados[i]) return;
-    const prev = data;
+    const prevData = data, prevDate = dayDate;
     data = JSON.parse(JSON.stringify(finalizados[i].datos || []));
+    dayDate = finalizados[i].fecha || prevDate;
     imprimirTodo();
-    data = prev;
-  }
+    data = prevData;
+    dayDate = prevDate;
+  };
 
   function headerPrintHTML(){
     return `
       <div class="encabezado-print">
-        <table>
-          <tr>
-            <td class="logo"><img src="logo.jpg" onerror="this.onerror=null;this.src='logo.jpg.jpeg';" alt="Logo"></td>
-            <td class="titulo"><strong>SISTEMA DE GESTIÓN DE CALIDAD</strong><br>INSPECCIÓN DE CARCASAS ANTES DEL LAVADO<br><span style="font-weight:900; color:#0b3d91;">PCC 1 FAENA</span></td>
-            <td class="info">RG-HCCP - PCC - 307/1<br>Emisión: 23/02/2026<br>Rev. 12</td>
-          </tr>
-        </table>
+        <table><tr>
+          <td class="logo"><img src="logo.jpg" onerror="this.onerror=null;this.src='logo.png';" alt="Logo"></td>
+          <td class="titulo"><strong>SISTEMA DE GESTIÓN DE CALIDAD</strong><br>INSPECCIÓN DE CARCASAS ANTES DEL LAVADO<br>
+          <span style="font-weight:900; color:#0b3d91;">PCC 1 FAENA</span></td>
+          <td class="info">RG-HCCP - PCC - 307/1<br>Emisión: 23/02/2026<br>Rev. 12</td>
+        </tr></table>
       </div>
     `;
   }
 
-  // ✅ Firmas al final (línea para firma)
   function firmasHTML(){
     const fecha = new Date().toLocaleDateString("es-AR");
     return `
       <div class="p-firmas">
-        <div class="p-firma-box">
-          <div><b>Analista</b></div>
-          <div class="p-line"></div>
-          <div class="p-small">Aclaración:</div>
-        </div>
-
-        <div class="p-firma-box">
-          <div><b>Verificador</b></div>
-          <div class="p-line"></div>
-          <div class="p-small">Aclaración:</div>
-        </div>
+        <div class="p-firma-box"><div><b>Analista</b></div><div class="p-line"></div><div class="p-small">Aclaración:</div></div>
+        <div class="p-firma-box"><div><b>Verificador</b></div><div class="p-line"></div><div class="p-small">Aclaración:</div></div>
       </div>
-      <div class="p-right p-small" style="margin-top:8px;"><b>Fecha:</b> ${esc(fecha)}</div>
+      <div class="p-right p-small" style="margin-top:8px;"><b>Fecha impresión:</b> ${esc(fecha)}</div>
     `;
   }
 
   function imprimirTodo(){
-    const fecha = new Date().toLocaleDateString("es-AR");
-    let html = `<div class="print-page">`;
-
+    let html = '<div class="print-page">';
     html += headerPrintHTML();
-    html += `<div class="p-title">REGISTRO PCC 1 - ${esc(fecha)}</div>`;
+    html += `<div class="p-title">REGISTRO PCC 1 - ${esc(dayDate || "")}</div>`;
     html += `
       <table class="p-table">
         <thead><tr><th>Garrón</th><th>Hora</th><th>0/1</th><th>Resp</th></tr></thead>
         <tbody>
-          ${data.map(d=>`
-            <tr><td>${esc(d.g)}</td><td>${esc(d.h)}</td><td>${esc(d.b)}</td><td>${esc(d.r)}</td></tr>
-          `).join("")}
+          ${data.map(d=>`<tr><td>${esc(d.g)}</td><td>${esc(d.h)}</td><td>${esc(d.b)}</td><td>${esc(d.r)}</td></tr>`).join("")}
         </tbody>
       </table>
     `;
@@ -684,25 +735,25 @@
         <thead>
           <tr>
             <th>Garrón</th><th>Lado</th><th>Ubicación</th><th>Hora</th>
-            <th>Acción correctiva</th><th>Hora cor.</th><th>Restablecimiento</th><th>Preventiva</th><th>Encargado</th>
+            <th>Fecha</th><th>Descripción del desvío</th>
+            <th>No conformidad</th><th>Acción correctiva</th><th>Acción preventiva</th><th>Encargado</th>
           </tr>
         </thead>
         <tbody>
           ${devs.map(d=>`
             <tr>
               <td>${esc(d.g)}</td><td>${esc(d.lado)}</td><td>${esc(d.ubicacion)}</td><td>${esc(d.h)}</td>
-              <td>${esc(d.accionCorrectiva)}</td><td>${esc(d.horaCorreccion)}</td><td>${esc(d.restablecimiento)}</td>
-              <td>${esc(d.preventiva)}</td><td>${esc(d.encargado)}</td>
+              <td>${esc(d.fechaDesvio)}</td><td>${esc(d.descDesvio)}</td><td>${esc(d.nc)}</td>
+              <td>${esc(d.ac)}</td><td>${esc(d.ap)}</td><td>${esc(d.enc)}</td>
             </tr>
           `).join("")}
         </tbody>
       </table>
     `;
 
-    // ✅ Agregamos firmas al final
     html += firmasHTML();
+    html += '</div>';
 
-    html += `</div>`;
     document.getElementById("print-replica").innerHTML = html;
     setTimeout(()=>window.print(), 200);
   }
@@ -711,9 +762,9 @@
   loadAll();
   capTime();
   updateGarron();
+  setLockUI();
   renderAll();
   renderFinalizados();
 </script>
-
 </body>
 </html>
