@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PCC1 - Inspección de Carcasas</title>
+  <title>PCC 1 FAENA</title>
 
   <style>
     :root{
@@ -39,7 +39,6 @@
     .toolbar .sky{ background:var(--sky); }
     .toolbar .green{ background:var(--green); }
     .toolbar .red{ background:var(--red); }
-    .toolbar .gray{ background:var(--gray); }
 
     .card-entry{
       background:var(--card);
@@ -63,7 +62,6 @@
     }
     textarea{ resize:vertical; min-height:70px; }
 
-    /* checkbox discreto sin texto */
     .switchline{
       display:flex; align-items:center; gap:8px;
       margin-top:6px;
@@ -82,7 +80,7 @@
     td.left{ text-align:left; }
     .mini{
       border:none; border-radius:10px; padding:8px 10px; cursor:pointer;
-      font-weight:900; color:#fff; background:var(--gray);
+      font-weight:900; color:#fff; background:#64748b;
     }
     .mini.red{ background:var(--red); }
     .mini:disabled{ opacity:.35; cursor:not-allowed; }
@@ -90,6 +88,7 @@
     .cell-inp{ padding:6px 8px; border-radius:10px; border:1px solid var(--border); font-size:13px; }
     .cell-sel{ padding:6px 8px; border-radius:10px; border:1px solid var(--border); font-size:13px; background:#fff; }
 
+    /* PRINT */
     #print-replica{ display:none; }
     @media print{
       .tabs, .toolbar, .card-entry, .table-container { display:none !important; }
@@ -161,25 +160,26 @@
 
   <div class="card-entry">
     <div class="row">
-      <label>FECHA (DÍA DE REGISTRO)</label>
+      <label>Fecha (día de registro)</label>
       <input type="date" id="dayDate">
     </div>
 
     <div class="row">
-      <label>GARRÓN</label>
+      <label>Garrón</label>
       <input id="inG" inputmode="numeric" placeholder="(auto)">
     </div>
 
     <div class="row">
-      <label>HORA</label>
+      <label>Hora</label>
       <input type="time" id="inH" step="60">
       <div class="switchline">
+        <!-- Checkbox discreto (sin texto) -->
         <input type="checkbox" id="lockMode" title=" ">
       </div>
     </div>
 
     <div class="row">
-      <label>DESVÍO (0/1)</label>
+      <label>Desvío (0/1)</label>
       <select id="inB">
         <option value="0">0</option>
         <option value="1">1</option>
@@ -187,7 +187,7 @@
     </div>
 
     <div class="row">
-      <label>RESP</label>
+      <label>Resp</label>
       <select id="inR">
         <option value="">-</option>
         <option value="MQ">MQ</option>
@@ -207,6 +207,7 @@
     <button class="tab-btn" data-tab="tab3">DÍAS FINALIZADOS</button>
   </div>
 
+  <!-- TAB 1 -->
   <div id="tab1" class="tab-content active">
     <div class="table-container">
       <table>
@@ -224,6 +225,7 @@
     </div>
   </div>
 
+  <!-- TAB 2 -->
   <div id="tab2" class="tab-content">
     <div class="table-container">
       <table>
@@ -233,8 +235,9 @@
             <th style="width:90px;">Hora</th>
             <th style="width:130px;">Fecha</th>
             <th>Descripción del desvío</th>
-            <th>No conformidad</th>
             <th>Acción correctiva</th>
+            <th>Hora/ corregido SI/NO disposición del producto</th>
+            <th>Restablecimiento de control del proceso</th>
             <th>Acción preventiva</th>
             <th style="width:140px;">Encargado</th>
           </tr>
@@ -244,6 +247,7 @@
     </div>
   </div>
 
+  <!-- TAB 3 -->
   <div id="tab3" class="tab-content">
     <div class="table-container">
       <table>
@@ -263,10 +267,11 @@
   <div id="print-replica"></div>
 
 <script>
-  const LS_DAYDATE = "pcc1_daydate_v9";
-  const LS_DAY     = "pcc1_day_v9";
-  const LS_FINAL   = "pcc1_final_v9";
-  const LS_LOCK    = "pcc1_lock_v9";
+  // ====== STORAGE KEYS ======
+  const LS_DAYDATE = "pcc1_daydate_v11";
+  const LS_DAY     = "pcc1_day_v11";
+  const LS_FINAL   = "pcc1_final_v11";
+  const LS_LOCK    = "pcc1_lock_v11";
 
   let data = [];
   let finalizados = [];
@@ -291,7 +296,7 @@
   const tbFinal = document.getElementById("tbFinal");
   const thBorrar = document.getElementById("thBorrar");
 
-  // logo fallback
+  // ====== LOGO FALLBACKS ======
   (function(){
     if(!elLogo) return;
     const candidates = ["logo.jpg","logo.jpeg","logo.png","logo.jpg.jpeg","LOGO.jpg","LOGO.JPG","Logo.jpg"];
@@ -304,6 +309,7 @@
     elLogo.src = candidates[0];
   })();
 
+  // ====== HELPERS ======
   function esc(s){
     s = String(s == null ? "" : s);
     return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
@@ -312,7 +318,6 @@
     s = String(s == null ? "" : s);
     return s.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   }
-
   function nowHHMM(){
     const d = new Date();
     const hh = String(d.getHours()).padStart(2,"0");
@@ -321,60 +326,9 @@
   }
   function todayISO(){ return new Date().toISOString().slice(0,10); }
   function capTime(){ inH.value = nowHHMM(); }
-
   function isLocked(){ return !!lockMode.checked; }
 
-  // ✅ CAMBIO: En auditoría se bloquea fecha/garrón/hora, pero NO desvío ni resp
-  function setLockUI(){
-    const locked = isLocked();
-
-    // Bloquear SOLO lo que no querés tocar en auditoría
-    inpDayDate.disabled = locked;
-    inG.disabled = locked;
-    inH.disabled = locked;
-
-    // NO bloquear estos (siempre se pueden)
-    inB.disabled = false;
-    inR.disabled = false;
-
-    // ocultar columna y botones de borrar en tabla cuando locked
-    thBorrar.style.display = locked ? "none" : "";
-
-    // ✅ si activan auditoría: arrancar en 1 y hora del dispositivo
-    if(locked){
-      capTime();
-      inG.value = "1";
-    }else{
-      // al volver a diaria, sugerir siguiente
-      inG.value = "";
-      updateGarron();
-    }
-
-    renderAll();
-  }
-
-  // ✅ CAMBIO: garrón en auditoría = data.length + 1 (1..N)
-  function nextGarronNumber(){
-    if(isLocked()){
-      return data.length + 1;
-    }
-    // diaria: max garrón + 1 (por si editan)
-    let maxG = 0;
-    for(const d of data){
-      const n = Number(d.g);
-      if(Number.isFinite(n) && n > maxG) maxG = n;
-    }
-    return maxG + 1;
-  }
-
-  function updateGarron(){
-    // NO pisar si el usuario está escribiendo
-    if(document.activeElement === inG) return;
-    if((inG.value || "").trim() === ""){
-      inG.value = String(nextGarronNumber());
-    }
-  }
-
+  // ====== LOAD/SAVE ======
   function loadAll(){
     try{
       data = JSON.parse(localStorage.getItem(LS_DAY) || "[]");
@@ -392,25 +346,69 @@
     if(!dayDate) dayDate = todayISO();
     inpDayDate.value = dayDate;
   }
-
   function saveDay(){ localStorage.setItem(LS_DAY, JSON.stringify(data)); }
   function saveFinal(){ localStorage.setItem(LS_FINAL, JSON.stringify(finalizados)); }
   function saveDayDate(){ localStorage.setItem(LS_DAYDATE, dayDate); }
 
+  // ====== GARRON AUTO ======
+  function nextGarronNumber(){
+    if(isLocked()) return data.length + 1;
+    let maxG = 0;
+    for(const d of data){
+      const n = Number(d.g);
+      if(Number.isFinite(n) && n > maxG) maxG = n;
+    }
+    return maxG + 1;
+  }
+  function updateGarron(){
+    if(document.activeElement === inG) return;
+    if((inG.value || "").trim() === ""){
+      inG.value = String(nextGarronNumber());
+    }
+  }
+
+  function setLockUI(){
+    const locked = isLocked();
+
+    // Registro bloqueado
+    inpDayDate.disabled = locked;
+    inG.disabled = locked;
+    inH.disabled = locked;
+
+    // Desvío + Resp siempre editables
+    inB.disabled = false;
+    inR.disabled = false;
+
+    // Oculta columna borrar en modo tildado
+    thBorrar.style.display = locked ? "none" : "";
+
+    if(locked){
+      capTime();
+      inG.value = "1";
+    }else{
+      inG.value = "";
+      updateGarron();
+    }
+
+    renderAll();
+  }
+
+  // ====== EVENTS ======
   inpDayDate.addEventListener("change", function(){
     dayDate = inpDayDate.value || todayISO();
     saveDayDate();
+    // Si querés que acciones existentes sin fecha tomen la nueva fecha al cambiar día:
+    // data.forEach(d=>{ if(!d.fechaAcc) d.fechaAcc = dayDate; }); saveDay();
+    renderAll();
   });
 
-  // tabs
   document.querySelectorAll(".tab-btn").forEach(btn=>{
     btn.addEventListener("click", function(){
       document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
       document.querySelectorAll(".tab-content").forEach(t=>t.classList.remove("active"));
       this.classList.add("active");
-      const id = this.getAttribute("data-tab");
-      document.getElementById(id).classList.add("active");
-      if(id === "tab3") renderFinalizados();
+      document.getElementById(this.getAttribute("data-tab")).classList.add("active");
+      if(this.getAttribute("data-tab")==="tab3") renderFinalizados();
     });
   });
 
@@ -432,14 +430,13 @@
     renderAll();
   });
 
+  btnAgregar.addEventListener("click", addRow);
+
+  // ====== CRUD ======
   function addRow(){
     const resp = (inR.value || "").trim().toUpperCase();
-    if(!resp){
-      alert("Falta RESP");
-      return;
-    }
+    if(!resp){ alert("Falta RESP"); return; }
 
-    // auditoría (locked): hora in situ del dispositivo SIEMPRE al guardar
     if(isLocked()) capTime();
 
     let gNum = Number((inG.value || "").trim());
@@ -451,34 +448,28 @@
       b: inB.value || "0",
       r: resp,
 
+      // acciones:
       lado:"",
       ubicacion:"",
-      fechaDesvio:"",
+      // ✅ FECHA AUTOMÁTICA: se setea con la fecha del registro
+      fechaAcc: (dayDate || todayISO()),
       descDesvio:"",
-      nc:"",
-      ac:"",
-      ap:"",
-      enc:""
+      accionCorrectiva:"",
+      horaCorregido:"",
+      restablecimiento:"",
+      accionPreventiva:"",
+      encargado:""
     });
 
     saveDay();
-
-    // pasar al siguiente garrón siempre
     inG.value = "";
     updateGarron();
-
-    // dejar RESP en "-" para la próxima
     inR.value = "";
-
-    // en auditoría dejar la hora del dispositivo para el siguiente
     if(isLocked()) capTime();
-
     renderAll();
   }
 
-  btnAgregar.addEventListener("click", addRow);
-
-  // editar / borrar filas (solo diaria)
+  // Registro: editar solo cuando NO está tildado
   window.updRow = function(idx, field, value){
     if(isLocked()) return;
 
@@ -507,12 +498,13 @@
     renderAll();
   };
 
+  // Acciones SIEMPRE editables (aunque esté tildado)
   window.saveField = function(idx, field, value){
-    if(isLocked()) return;
     data[idx][field] = value;
     saveDay();
   };
 
+  // ====== RENDER ======
   function renderRegistro(){
     const locked = isLocked();
 
@@ -560,11 +552,9 @@
     const devs = data.map((d,idx)=>({d,idx})).filter(x=>x.d.b==="1");
 
     if(devs.length === 0){
-      tbAcc.innerHTML = `<tr><td colspan="8" style="text-align:left;color:#64748b;">Sin desvíos (1).</td></tr>`;
+      tbAcc.innerHTML = `<tr><td colspan="9" style="text-align:left;color:#64748b;">Sin desvíos (1).</td></tr>`;
       return;
     }
-
-    const dis = ""; // SIEMPRE editable
 
     tbAcc.innerHTML = devs.map(x=>{
       const d = x.d, idx = x.idx;
@@ -573,33 +563,69 @@
         <tr>
           <td class="left">
             <div><b>Garrón ${esc(d.g)}</b></div>
-            <div style="margin-top:8px; display:grid; gap:6px;">
-              <select ${dis} onchange="saveField(${idx},'lado',this.value)">
+
+            <div style="margin-top:6px;">
+              <select onchange="saveField(${idx},'lado',this.value)">
                 <option value="">Lado</option>
                 <option value="Izquierdo" ${d.lado==="Izquierdo"?"selected":""}>Izquierdo</option>
                 <option value="Derecho" ${d.lado==="Derecho"?"selected":""}>Derecho</option>
               </select>
-              <select ${dis} onchange="saveField(${idx},'ubicacion',this.value)">
+            </div>
+
+            <div style="margin-top:6px;">
+              <select onchange="saveField(${idx},'ubicacion',this.value)">
                 <option value="">Ubicación</option>
                 <option value="Garrón" ${d.ubicacion==="Garrón"?"selected":""}>Garrón</option>
                 <option value="Culata" ${d.ubicacion==="Culata"?"selected":""}>Culata</option>
-                <option value="Nalga - Bola de lomo" ${d.ubicacion==="Nalga - Bola de lomo"?"selected":""}>Nalga - Bola de lomo</option>
-                <option value="Bifes - Cuadril" ${d.ubicacion==="Bifes - Cuadril"?"selected":""}>Bifes - Cuadril</option>
-                <option value="Pecho - Matambre - Ijada" ${d.ubicacion==="Pecho - Matambre - Ijada"?"selected":""}>Pecho - Matambre - Ijada</option>
-                <option value="Lomo - Costillas" ${d.ubicacion==="Lomo - Costillas"?"selected":""}>Lomo - Costillas</option>
-                <option value="Brazuelo - Cogote" ${d.ubicacion==="Brazuelo - Cogote"?"selected":""}>Brazuelo - Cogote</option>
-                <option value="Marucha - Paleta" ${d.ubicacion==="Marucha - Paleta"?"selected":""}>Marucha - Paleta</option>
-                <option value="Vacío - Entraña" ${d.ubicacion==="Vacío - Entraña"?"selected":""}>Vacío - Entraña</option>
+                <option value="Nalga-Bola de lomo" ${d.ubicacion==="Nalga-Bola de lomo"?"selected":""}>Nalga-Bola de lomo</option>
+                <option value="Bifes-cuadril" ${d.ubicacion==="Bifes-cuadril"?"selected":""}>Bifes-cuadril</option>
+                <option value="Pecho-Matambre-Ijada" ${d.ubicacion==="Pecho-Matambre-Ijada"?"selected":""}>Pecho-Matambre-Ijada</option>
+                <option value="Lomo-costillas" ${d.ubicacion==="Lomo-costillas"?"selected":""}>Lomo-costillas</option>
+                <option value="Brazuelo-Cogote" ${d.ubicacion==="Brazuelo-Cogote"?"selected":""}>Brazuelo-Cogote</option>
+                <option value="Marucha-Paleta" ${d.ubicacion==="Marucha-Paleta"?"selected":""}>Marucha-Paleta</option>
+                <option value="Vacio-Entraña" ${d.ubicacion==="Vacio-Entraña"?"selected":""}>Vacio-Entraña</option>
               </select>
             </div>
           </td>
+
           <td>${esc(d.h || "")}</td>
-          <td><input type="date" ${dis} value="${escAttr(d.fechaDesvio)}" onchange="saveField(${idx},'fechaDesvio',this.value)"></td>
-          <td><textarea ${dis} oninput="saveField(${idx},'descDesvio',this.value)">${esc(d.descDesvio)}</textarea></td>
-          <td><textarea ${dis} oninput="saveField(${idx},'nc',this.value)">${esc(d.nc)}</textarea></td>
-          <td><textarea ${dis} oninput="saveField(${idx},'ac',this.value)">${esc(d.ac)}</textarea></td>
-          <td><textarea ${dis} oninput="saveField(${idx},'ap',this.value)">${esc(d.ap)}</textarea></td>
-          <td><input ${dis} value="${escAttr(d.enc)}" oninput="saveField(${idx},'enc',this.value)"></td>
+
+          <td>
+            <!-- ✅ si alguna fila vieja está vacía, muestra la fecha del registro -->
+            <input type="date" value="${escAttr(d.fechaAcc || dayDate || '')}"
+                   onchange="saveField(${idx},'fechaAcc',this.value)">
+          </td>
+
+          <td>
+            <textarea oninput="saveField(${idx},'descDesvio',this.value)">${esc(d.descDesvio || '')}</textarea>
+          </td>
+
+          <td>
+            <textarea oninput="saveField(${idx},'accionCorrectiva',this.value)">${esc(d.accionCorrectiva || '')}</textarea>
+          </td>
+
+          <td>
+            <input value="${escAttr(d.horaCorregido || '')}"
+                   placeholder="Hora / Corregido SI/NO / disposición"
+                   oninput="saveField(${idx},'horaCorregido',this.value)">
+          </td>
+
+          <td>
+            <textarea oninput="saveField(${idx},'restablecimiento',this.value)">${esc(d.restablecimiento || '')}</textarea>
+          </td>
+
+          <td>
+            <textarea oninput="saveField(${idx},'accionPreventiva',this.value)">${esc(d.accionPreventiva || '')}</textarea>
+          </td>
+
+          <td>
+            <select onchange="saveField(${idx},'encargado',this.value)">
+              <option value="">Encargado</option>
+              <option value="Agustin Bravo" ${d.encargado==="Agustin Bravo"?"selected":""}>Agustin Bravo</option>
+              <option value="Juan Alegre" ${d.encargado==="Juan Alegre"?"selected":""}>Juan Alegre</option>
+              <option value="Carlos Esquivel" ${d.encargado==="Carlos Esquivel"?"selected":""}>Carlos Esquivel</option>
+            </select>
+          </td>
         </tr>
       `;
     }).join("");
@@ -612,7 +638,7 @@
     }
 
     tbFinal.innerHTML = finalizados.map((d,i)=>{
-      const estado = d.locked ? "OK" : "OK";
+      const estado = "OK";
       const btnEditar = d.locked
         ? `<button class="mini" disabled>Editar</button>`
         : `<button class="mini" onclick="cargarDia(${i})">Editar</button>`;
@@ -637,6 +663,7 @@
     renderAcciones();
   }
 
+  // ====== FINALIZAR / DIAS ======
   function finalizarDia(){
     if(!data.length){ alert("No hay registros."); return; }
     if(!dayDate){ alert("Falta la fecha del día."); return; }
@@ -647,6 +674,7 @@
       savedAt: new Date().toISOString(),
       datos: JSON.parse(JSON.stringify(data))
     };
+
     finalizados = finalizados.filter(x=>x.fecha !== dayDate);
     finalizados.unshift(snap);
     saveFinal();
@@ -668,10 +696,6 @@
     document.querySelector('.tab-btn[data-tab="tab1"]').click();
   };
 
-  function saveDay(){ localStorage.setItem(LS_DAY, JSON.stringify(data)); }
-  function saveFinal(){ localStorage.setItem(LS_FINAL, JSON.stringify(finalizados)); }
-  function saveDayDate(){ localStorage.setItem(LS_DAYDATE, dayDate); }
-
   window.borrarDia = function(i){
     if(!finalizados[i]) return;
     if(!confirm("¿Borrar día finalizado?")) return;
@@ -690,13 +714,34 @@
     dayDate = prevDate;
   };
 
+  // ====== PRINT HEADERS ======
   function headerPrintHTML(){
     return `
       <div class="encabezado-print">
         <table><tr>
           <td class="logo"><img src="logo.jpg" onerror="this.onerror=null;this.src='logo.png';" alt="Logo"></td>
-          <td class="titulo"><strong>SISTEMA DE GESTIÓN DE CALIDAD</strong><br>INSPECCIÓN DE CARCASAS ANTES DEL LAVADO<br>
-          <span style="font-weight:900; color:#0b3d91;">PCC 1 FAENA</span></td>
+          <td class="titulo">
+            <strong>SISTEMA DE GESTIÓN DE CALIDAD</strong><br>
+            INSPECCIÓN DE CARCASAS ANTES DEL LAVADO<br>
+            <span style="font-weight:900; color:#0b3d91;">PCC 1 FAENA</span>
+          </td>
+          <td class="info">RG-HCCP - PCC - 307/1<br>Emisión: 23/02/2026<br>Rev. 12</td>
+        </tr></table>
+      </div>
+    `;
+  }
+
+  // ✅ Encabezado especial SOLO para ACCIONES (PDF)
+  function headerPrintAccionesHTML(){
+    return `
+      <div class="encabezado-print">
+        <table><tr>
+          <td class="logo"><img src="logo.jpg" onerror="this.onerror=null;this.src='logo.png';" alt="Logo"></td>
+          <td class="titulo">
+            <strong>SISTEMA DE GESTIÓN DE CALIDAD</strong><br>
+            DESCRIPCIÓN DEL DESVÍO<br>
+            <span style="font-weight:900; color:#0b3d91;">HACCP - PCC1 FAENA</span>
+          </td>
           <td class="info">RG-HCCP - PCC - 307/1<br>Emisión: 23/02/2026<br>Rev. 12</td>
         </tr></table>
       </div>
@@ -716,35 +761,65 @@
 
   function imprimirTodo(){
     let html = '<div class="print-page">';
+
+    // REGISTRO
     html += headerPrintHTML();
     html += `<div class="p-title">REGISTRO PCC 1 - ${esc(dayDate || "")}</div>`;
     html += `
       <table class="p-table">
-        <thead><tr><th>Garrón</th><th>Hora</th><th>0/1</th><th>Resp</th></tr></thead>
+        <thead>
+          <tr><th>Garrón</th><th>Hora</th><th>0/1</th><th>Resp</th></tr>
+        </thead>
         <tbody>
-          ${data.map(d=>`<tr><td>${esc(d.g)}</td><td>${esc(d.h)}</td><td>${esc(d.b)}</td><td>${esc(d.r)}</td></tr>`).join("")}
+          ${data.map(d=>`
+            <tr>
+              <td>${esc(d.g)}</td>
+              <td>${esc(d.h)}</td>
+              <td>${esc(d.b)}</td>
+              <td>${esc(d.r)}</td>
+            </tr>
+          `).join("")}
         </tbody>
       </table>
     `;
 
+    // ACCIONES
     const devs = data.filter(d=>d.b==="1");
-    html += headerPrintHTML();
-    html += `<div class="p-title">ACCIONES</div>`;
+
+    // ✅ Encabezado especial para acciones
+    html += headerPrintAccionesHTML();
+    html += `<div class="p-title">DESCRIPCIÓN DEL DESVÍO</div>`;
     html += `
       <table class="p-table">
         <thead>
           <tr>
-            <th>Garrón</th><th>Lado</th><th>Ubicación</th><th>Hora</th>
-            <th>Fecha</th><th>Descripción del desvío</th>
-            <th>No conformidad</th><th>Acción correctiva</th><th>Acción preventiva</th><th>Encargado</th>
+            <th>Garrón</th>
+            <th>Lado</th>
+            <th>Ubicación</th>
+            <th>Hora</th>
+            <th>Fecha</th>
+            <th>Descripción del desvío</th>
+            <th>Acción correctiva</th>
+            <th>Hora/ corregido SI/NO disposición del producto</th>
+            <th>Restablecimiento de control del proceso</th>
+            <th>Acción preventiva</th>
+            <th>Encargado</th>
           </tr>
         </thead>
         <tbody>
           ${devs.map(d=>`
             <tr>
-              <td>${esc(d.g)}</td><td>${esc(d.lado)}</td><td>${esc(d.ubicacion)}</td><td>${esc(d.h)}</td>
-              <td>${esc(d.fechaDesvio)}</td><td>${esc(d.descDesvio)}</td><td>${esc(d.nc)}</td>
-              <td>${esc(d.ac)}</td><td>${esc(d.ap)}</td><td>${esc(d.enc)}</td>
+              <td>${esc(d.g)}</td>
+              <td>${esc(d.lado)}</td>
+              <td>${esc(d.ubicacion)}</td>
+              <td>${esc(d.h)}</td>
+              <td>${esc(d.fechaAcc)}</td>
+              <td>${esc(d.descDesvio)}</td>
+              <td>${esc(d.accionCorrectiva)}</td>
+              <td>${esc(d.horaCorregido)}</td>
+              <td>${esc(d.restablecimiento)}</td>
+              <td>${esc(d.accionPreventiva)}</td>
+              <td>${esc(d.encargado)}</td>
             </tr>
           `).join("")}
         </tbody>
@@ -758,7 +833,7 @@
     setTimeout(()=>window.print(), 200);
   }
 
-  // INIT
+  // ====== INIT ======
   loadAll();
   capTime();
   updateGarron();
