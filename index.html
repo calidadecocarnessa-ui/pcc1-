@@ -11,29 +11,91 @@
       --blue:#2563eb; --red:#ef4444; --sky:#0ea5e9; --green:#16a34a; --gray:#64748b;
       --muted:#6b7280;
     }
-    body{ margin:0; padding:10px; font-family:Arial, sans-serif; background:var(--bg); color:var(--text); }
 
-    .encabezado table{ width:100%; border-collapse:collapse; background:#fff; margin-bottom:10px; }
-    .encabezado td{ border:2px solid #000; padding:8px; vertical-align:middle; }
-    .logo{ width:20%; text-align:center; background:#f3f6ff; }
-    .logo img{ max-width:140px; max-height:70px; object-fit:contain; display:block; margin:0 auto; }
-    .titulo{ width:60%; text-align:center; font-size:13px; line-height:1.2; }
-    .titulo span{ color:#0b3d91; font-weight:700; }
-    .info{ width:20%; text-align:center; background:#cfefff; font-size:12px; line-height:1.25; }
-
-    .tabs{ display:flex; gap:6px; margin-bottom:10px; }
-    .tab-btn{
-      flex:1; padding:12px; cursor:pointer; font-weight:900;
-      border:none; border-radius:12px;
-      background:#cbd5e1; color:#334155;
+    body{
+      margin:0;
+      padding:10px;
+      font-family:Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
     }
-    .tab-btn.active{ background:var(--blue); color:#fff; }
+
+    .encabezado table{
+      width:100%;
+      border-collapse:collapse;
+      background:#fff;
+      margin-bottom:10px;
+    }
+    .encabezado td{
+      border:2px solid #000;
+      padding:8px;
+      vertical-align:middle;
+    }
+    .logo{
+      width:20%;
+      text-align:center;
+      background:#f3f6ff;
+    }
+    .logo img{
+      max-width:140px;
+      max-height:70px;
+      object-fit:contain;
+      display:block;
+      margin:0 auto;
+    }
+    .titulo{
+      width:60%;
+      text-align:center;
+      font-size:13px;
+      line-height:1.2;
+    }
+    .titulo span{
+      color:#0b3d91;
+      font-weight:700;
+    }
+    .info{
+      width:20%;
+      text-align:center;
+      background:#cfefff;
+      font-size:12px;
+      line-height:1.25;
+    }
+
+    .tabs{
+      display:flex;
+      gap:6px;
+      margin-bottom:10px;
+    }
+    .tab-btn{
+      flex:1;
+      padding:12px;
+      cursor:pointer;
+      font-weight:900;
+      border:none;
+      border-radius:12px;
+      background:#cbd5e1;
+      color:#334155;
+    }
+    .tab-btn.active{
+      background:var(--blue);
+      color:#fff;
+    }
     .tab-content{ display:none; }
     .tab-content.active{ display:block; }
 
-    .toolbar{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
+    .toolbar{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin:10px 0;
+    }
     .toolbar button{
-      padding:10px 12px; border:none; border-radius:12px; cursor:pointer; font-weight:900; color:#fff;
+      padding:10px 12px;
+      border:none;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:900;
+      color:#fff;
       background:var(--blue);
     }
     .toolbar .sky{ background:var(--sky); }
@@ -41,7 +103,7 @@
     .toolbar .red{ background:var(--red); }
 
     .card-entry{
-      background:var(--card);
+      background:#fff;
       border:1px solid var(--border);
       border-radius:16px;
       padding:12px;
@@ -50,63 +112,217 @@
       gap:10px;
       margin-bottom:10px;
     }
-    .row{ display:flex; flex-direction:column; gap:6px; }
-    label{ font-size:10px; font-weight:900; color:var(--muted); text-transform:uppercase; }
+
+    .row{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    label{
+      font-size:10px;
+      font-weight:900;
+      color:var(--muted);
+      text-transform:uppercase;
+    }
 
     input, select, textarea{
-      width:100%; box-sizing:border-box;
-      padding:10px; border-radius:12px;
+      width:100%;
+      box-sizing:border-box;
+      padding:10px;
+      border-radius:12px;
       border:1px solid var(--border);
       background:#fff;
       font-size:14px;
     }
-    textarea{ resize:vertical; min-height:70px; }
+
+    textarea{
+      resize:vertical;
+      min-height:70px;
+    }
 
     .switchline{
-      display:flex; align-items:center; gap:8px;
+      display:flex;
+      align-items:center;
+      gap:8px;
       margin-top:6px;
     }
 
     .table-container{
-      background:var(--card);
+      background:#fff;
       border:1px solid var(--border);
       border-radius:16px;
       overflow:auto;
     }
-    table{ width:100%; border-collapse:collapse; }
-    th, td{ border-bottom:1px solid var(--border); padding:10px; text-align:center; font-size:13px; vertical-align:top; }
-    th{ position:sticky; top:0; background:#f8fafc; color:var(--muted); font-weight:900; }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    th, td{
+      border-bottom:1px solid var(--border);
+      padding:10px;
+      text-align:center;
+      font-size:13px;
+      vertical-align:top;
+    }
+
+    th{
+      position:sticky;
+      top:0;
+      background:#f8fafc;
+      color:var(--muted);
+      font-weight:900;
+    }
 
     td.left{ text-align:left; }
-    .mini{
-      border:none; border-radius:10px; padding:8px 10px; cursor:pointer;
-      font-weight:900; color:#fff; background:#64748b;
-    }
-    .mini.red{ background:var(--red); }
-    .mini:disabled{ opacity:.35; cursor:not-allowed; }
 
-    .cell-inp{ padding:6px 8px; border-radius:10px; border:1px solid var(--border); font-size:13px; }
-    .cell-sel{ padding:6px 8px; border-radius:10px; border:1px solid var(--border); font-size:13px; background:#fff; }
+    .mini{
+      border:none;
+      border-radius:10px;
+      padding:8px 10px;
+      cursor:pointer;
+      font-weight:900;
+      color:#fff;
+      background:var(--gray);
+    }
+
+    .mini.red{ background:var(--red); }
+
+    .cell-inp{
+      padding:6px 8px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      font-size:13px;
+    }
+
+    .cell-sel{
+      padding:6px 8px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      font-size:13px;
+      background:#fff;
+    }
+
+    #firmasBox{
+      margin-top:12px;
+      background:#fff;
+      border:1px solid #d0d7de;
+      border-radius:16px;
+      padding:12px;
+    }
+
+    .firmas-flex{
+      display:flex;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+
+    .firma-item{
+      flex:1;
+      min-width:260px;
+      border:1px solid #d0d7de;
+      border-radius:14px;
+      padding:12px;
+    }
+
+    .firma-linea{
+      border-bottom:2px solid #111;
+      height:26px;
+      margin-bottom:8px;
+    }
 
     /* PRINT */
     #print-replica{ display:none; }
+
     @media print{
-      .tabs, .toolbar, .card-entry, .table-container { display:none !important; }
-      #print-replica{ display:block !important; }
-      body > .encabezado{ display:none !important; }
-      @page{ size:A4 landscape; margin:0.6cm; }
+      .tabs, .toolbar, .card-entry, .table-container, #firmasBox{
+        display:none !important;
+      }
 
-      .p-table{ width:100%; border-collapse:collapse; table-layout:fixed; }
-      .p-table th, .p-table td{ border:1px solid #000; padding:4px; font-size:9pt; vertical-align:top; }
-      .p-table th{ background:#eee; }
-      .p-title{ text-align:center; font-weight:900; margin:8px 0 10px; }
+      #print-replica{
+        display:block !important;
+      }
 
-      .encabezado-print table{ width:100%; border-collapse:collapse; margin-bottom:8px; }
-      .encabezado-print td{ border:2px solid #000; padding:6px; vertical-align:middle; }
-      .encabezado-print .logo{ width:20%; text-align:center; }
-      .encabezado-print .logo img{ max-width:130px; max-height:60px; object-fit:contain; }
-      .encabezado-print .titulo{ width:60%; text-align:center; font-size:12px; }
-      .encabezado-print .info{ width:20%; text-align:center; font-size:11px; background:#cfefff; }
+      body > .encabezado{
+        display:none !important;
+      }
+
+      @page{
+        size:A4 landscape;
+        margin:0.6cm;
+      }
+
+      .print-section{
+        page-break-after:always;
+      }
+      .print-section:last-child{
+        page-break-after:auto;
+      }
+
+      .p-table{
+        width:100%;
+        border-collapse:collapse;
+        table-layout:fixed;
+      }
+
+      .p-table th, .p-table td{
+        border:1px solid #000;
+        padding:4px;
+        font-size:9pt;
+        vertical-align:top;
+      }
+
+      .p-table th{
+        background:#eee;
+      }
+
+      .p-title{
+        text-align:center;
+        font-weight:900;
+        margin:8px 0 10px;
+      }
+
+      .encabezado-print{
+        display:block;
+      }
+
+      .encabezado-print table{
+        width:100%;
+        border-collapse:collapse;
+        margin-bottom:8px;
+      }
+
+      .encabezado-print td{
+        border:2px solid #000;
+        padding:6px;
+        vertical-align:middle;
+      }
+
+      .encabezado-print .logo{
+        width:20%;
+        text-align:center;
+      }
+
+      .encabezado-print .logo img{
+        max-width:130px;
+        max-height:60px;
+        object-fit:contain;
+      }
+
+      .encabezado-print .titulo{
+        width:60%;
+        text-align:center;
+        font-size:12px;
+      }
+
+      .encabezado-print .info{
+        width:20%;
+        text-align:center;
+        font-size:11px;
+        background:#cfefff;
+      }
 
       .p-firmas{
         margin-top:14px;
@@ -116,23 +332,27 @@
         align-items:flex-end;
         font-size:10pt;
       }
+
       .p-firma-box{
         width:48%;
         border:1px solid #000;
         padding:10px;
       }
+
       .p-line{
         border-bottom:1px solid #000;
         height:18px;
         margin:12px 0 6px;
       }
+
       .p-small{ font-size:9pt; }
       .p-right{ text-align:right; }
     }
   </style>
 </head>
-
 <body>
+
+  <!-- ENCABEZADO SIEMPRE VISIBLE -->
   <div class="encabezado">
     <table>
       <tr>
@@ -173,7 +393,6 @@
       <label>Hora</label>
       <input type="time" id="inH" step="60">
       <div class="switchline">
-        <!-- Checkbox discreto (sin texto) -->
         <input type="checkbox" id="lockMode" title=" ">
       </div>
     </div>
@@ -197,7 +416,7 @@
         <option value="AA">AA</option>
       </select>
 
-      <button type="button" id="btnAgregar" class="mini" style="background: var(--green); margin-top:8px;">+ CARGAR</button>
+      <button type="button" id="btnAgregar" class="mini" style="background: var(--green); margin-top:8px;">+ AGREGAR</button>
     </div>
   </div>
 
@@ -264,14 +483,34 @@
     </div>
   </div>
 
+  <!-- FIRMAS SOLO EN REGISTRO -->
+  <div id="firmasBox">
+    <div style="font-weight:900; color:#64748b; margin-bottom:10px; text-transform:uppercase; font-size:12px;">
+      Firmas
+    </div>
+
+    <div class="firmas-flex">
+      <div class="firma-item">
+        <div style="font-weight:900; margin-bottom:10px;">Analista</div>
+        <div class="firma-linea"></div>
+        <div style="font-size:12px; color:#6b7280;">Aclaración:</div>
+      </div>
+
+      <div class="firma-item">
+        <div style="font-weight:900; margin-bottom:10px;">Verificador</div>
+        <div class="firma-linea"></div>
+        <div style="font-size:12px; color:#6b7280;">Aclaración:</div>
+      </div>
+    </div>
+  </div>
+
   <div id="print-replica"></div>
 
 <script>
-  // ====== STORAGE KEYS ======
-  const LS_DAYDATE = "pcc1_daydate_v11";
-  const LS_DAY     = "pcc1_day_v11";
-  const LS_FINAL   = "pcc1_final_v11";
-  const LS_LOCK    = "pcc1_lock_v11";
+  const LS_DAYDATE = "pcc1_daydate_v12";
+  const LS_DAY     = "pcc1_day_v12";
+  const LS_FINAL   = "pcc1_final_v12";
+  const LS_LOCK    = "pcc1_lock_v12";
 
   let data = [];
   let finalizados = [];
@@ -295,64 +534,84 @@
   const tbAcc = document.getElementById("tbAcc");
   const tbFinal = document.getElementById("tbFinal");
   const thBorrar = document.getElementById("thBorrar");
+  const firmasBox = document.getElementById("firmasBox");
 
-  // ====== LOGO FALLBACKS ======
   (function(){
     if(!elLogo) return;
     const candidates = ["logo.jpg","logo.jpeg","logo.png","logo.jpg.jpeg","LOGO.jpg","LOGO.JPG","Logo.jpg"];
-    let i=0;
+    let i = 0;
     elLogo.onerror = function(){
       i++;
       if(i < candidates.length) elLogo.src = candidates[i];
-      else { elLogo.style.display="none"; elLogo.parentNode.innerHTML="<b>LOGO</b>"; }
+      else elLogo.style.display = "none";
     };
     elLogo.src = candidates[0];
   })();
 
-  // ====== HELPERS ======
   function esc(s){
     s = String(s == null ? "" : s);
     return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   }
+
   function escAttr(s){
     s = String(s == null ? "" : s);
     return s.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   }
+
   function nowHHMM(){
     const d = new Date();
-    const hh = String(d.getHours()).padStart(2,"0");
-    const mm = String(d.getMinutes()).padStart(2,"0");
-    return hh + ":" + mm;
+    return String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
   }
-  function todayISO(){ return new Date().toISOString().slice(0,10); }
-  function capTime(){ inH.value = nowHHMM(); }
-  function isLocked(){ return !!lockMode.checked; }
 
-  // ====== LOAD/SAVE ======
+  function todayISO(){
+    return new Date().toISOString().slice(0,10);
+  }
+
+  function capTime(){
+    inH.value = nowHHMM();
+  }
+
+  function isLocked(){
+    return !!lockMode.checked;
+  }
+
+  function saveDay(){
+    localStorage.setItem(LS_DAY, JSON.stringify(data));
+  }
+
+  function saveFinal(){
+    localStorage.setItem(LS_FINAL, JSON.stringify(finalizados));
+  }
+
+  function saveDayDate(){
+    localStorage.setItem(LS_DAYDATE, dayDate);
+  }
+
   function loadAll(){
     try{
       data = JSON.parse(localStorage.getItem(LS_DAY) || "[]");
       if(!Array.isArray(data)) data = [];
-    }catch(e){ data = []; }
+    }catch(e){
+      data = [];
+    }
 
     try{
       finalizados = JSON.parse(localStorage.getItem(LS_FINAL) || "[]");
       if(!Array.isArray(finalizados)) finalizados = [];
-    }catch(e){ finalizados = []; }
+    }catch(e){
+      finalizados = [];
+    }
 
     lockMode.checked = (localStorage.getItem(LS_LOCK) === "1");
 
-    dayDate = localStorage.getItem(LS_DAYDATE) || "";
-    if(!dayDate) dayDate = todayISO();
+    dayDate = localStorage.getItem(LS_DAYDATE) || todayISO();
     inpDayDate.value = dayDate;
   }
-  function saveDay(){ localStorage.setItem(LS_DAY, JSON.stringify(data)); }
-  function saveFinal(){ localStorage.setItem(LS_FINAL, JSON.stringify(finalizados)); }
-  function saveDayDate(){ localStorage.setItem(LS_DAYDATE, dayDate); }
 
-  // ====== GARRON AUTO ======
   function nextGarronNumber(){
-    if(isLocked()) return data.length + 1;
+    if(isLocked()){
+      return data.length + 1;
+    }
     let maxG = 0;
     for(const d of data){
       const n = Number(d.g);
@@ -360,6 +619,7 @@
     }
     return maxG + 1;
   }
+
   function updateGarron(){
     if(document.activeElement === inG) return;
     if((inG.value || "").trim() === ""){
@@ -370,21 +630,18 @@
   function setLockUI(){
     const locked = isLocked();
 
-    // Registro bloqueado
     inpDayDate.disabled = locked;
     inG.disabled = locked;
     inH.disabled = locked;
 
-    // Desvío + Resp siempre editables
     inB.disabled = false;
     inR.disabled = false;
 
-    // Oculta columna borrar en modo tildado
     thBorrar.style.display = locked ? "none" : "";
 
     if(locked){
       capTime();
-      inG.value = "1";
+      inG.value = String(nextGarronNumber());
     }else{
       inG.value = "";
       updateGarron();
@@ -393,54 +650,19 @@
     renderAll();
   }
 
-  // ====== EVENTS ======
-  inpDayDate.addEventListener("change", function(){
-    dayDate = inpDayDate.value || todayISO();
-    saveDayDate();
-    // Si querés que acciones existentes sin fecha tomen la nueva fecha al cambiar día:
-    // data.forEach(d=>{ if(!d.fechaAcc) d.fechaAcc = dayDate; }); saveDay();
-    renderAll();
-  });
-
-  document.querySelectorAll(".tab-btn").forEach(btn=>{
-    btn.addEventListener("click", function(){
-      document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
-      document.querySelectorAll(".tab-content").forEach(t=>t.classList.remove("active"));
-      this.classList.add("active");
-      document.getElementById(this.getAttribute("data-tab")).classList.add("active");
-      if(this.getAttribute("data-tab")==="tab3") renderFinalizados();
-    });
-  });
-
-  btnHora.addEventListener("click", capTime);
-  btnPDF.addEventListener("click", imprimirTodo);
-  btnFinalizar.addEventListener("click", finalizarDia);
-
-  lockMode.addEventListener("change", function(){
-    localStorage.setItem(LS_LOCK, lockMode.checked ? "1" : "0");
-    setLockUI();
-    if(isLocked()) capTime();
-  });
-
-  btnBorrar.addEventListener("click", function(){
-    if(!confirm("¿Borrar todo el día actual en este dispositivo?")) return;
-    data = [];
-    saveDay();
-    updateGarron();
-    renderAll();
-  });
-
-  btnAgregar.addEventListener("click", addRow);
-
-  // ====== CRUD ======
   function addRow(){
     const resp = (inR.value || "").trim().toUpperCase();
-    if(!resp){ alert("Falta RESP"); return; }
+    if(!resp){
+      alert("Falta RESP");
+      return;
+    }
 
     if(isLocked()) capTime();
 
     let gNum = Number((inG.value || "").trim());
-    if(!Number.isFinite(gNum) || gNum <= 0) gNum = nextGarronNumber();
+    if(!Number.isFinite(gNum) || gNum <= 0){
+      gNum = nextGarronNumber();
+    }
 
     data.push({
       g: gNum,
@@ -448,28 +670,27 @@
       b: inB.value || "0",
       r: resp,
 
-      // acciones:
-      lado:"",
-      ubicacion:"",
-      // ✅ FECHA AUTOMÁTICA: se setea con la fecha del registro
+      lado: "",
+      ubicacion: "",
       fechaAcc: (dayDate || todayISO()),
-      descDesvio:"",
-      accionCorrectiva:"",
-      horaCorregido:"",
-      restablecimiento:"",
-      accionPreventiva:"",
-      encargado:""
+      descDesvio: "",
+      accionCorrectiva: "",
+      horaCorregido: "",
+      restablecimiento: "",
+      accionPreventiva: "",
+      encargado: ""
     });
 
     saveDay();
+
     inG.value = "";
     updateGarron();
     inR.value = "";
     if(isLocked()) capTime();
+
     renderAll();
   }
 
-  // Registro: editar solo cuando NO está tildado
   window.updRow = function(idx, field, value){
     if(isLocked()) return;
 
@@ -477,14 +698,15 @@
       const n = Number(value);
       if(!Number.isFinite(n) || n <= 0) return;
       data[idx].g = n;
-    } else if(field === "b"){
+    }else if(field === "b"){
       if(value !== "0" && value !== "1") return;
       data[idx].b = value;
-    } else if(field === "r"){
+    }else if(field === "r"){
       data[idx].r = String(value || "").trim().toUpperCase();
-    } else if(field === "h"){
+    }else if(field === "h"){
       data[idx].h = value || "";
     }
+
     saveDay();
     renderAll();
   };
@@ -498,17 +720,15 @@
     renderAll();
   };
 
-  // Acciones SIEMPRE editables (aunque esté tildado)
   window.saveField = function(idx, field, value){
     data[idx][field] = value;
     saveDay();
   };
 
-  // ====== RENDER ======
   function renderRegistro(){
     const locked = isLocked();
 
-    tbReg.innerHTML = data.map((d,idx)=>{
+    tbReg.innerHTML = data.map((d, idx) => {
       if(locked){
         return `
           <tr>
@@ -540,7 +760,7 @@
               <option value="AA" ${d.r==="AA"?"selected":""}>AA</option>
             </select>
           </td>
-          <td style="display:${locked?"none":""}">
+          <td style="display:${locked ? "none" : ""}">
             <button class="mini red" onclick="deleteRow(${idx})">🗑️</button>
           </td>
         </tr>
@@ -549,14 +769,14 @@
   }
 
   function renderAcciones(){
-    const devs = data.map((d,idx)=>({d,idx})).filter(x=>x.d.b==="1");
+    const devs = data.map((d, idx) => ({d, idx})).filter(x => x.d.b === "1");
 
     if(devs.length === 0){
-      tbAcc.innerHTML = `<tr><td colspan="9" style="text-align:left;color:#64748b;">Sin desvíos (1).</td></tr>`;
+      tbAcc.innerHTML = <tr><td colspan="9" style="text-align:left;color:#64748b;">Sin desvíos (1).</td></tr>;
       return;
     }
 
-    tbAcc.innerHTML = devs.map(x=>{
+    tbAcc.innerHTML = devs.map(x => {
       const d = x.d, idx = x.idx;
 
       return `
@@ -591,7 +811,6 @@
           <td>${esc(d.h || "")}</td>
 
           <td>
-            <!-- ✅ si alguna fila vieja está vacía, muestra la fecha del registro -->
             <input type="date" value="${escAttr(d.fechaAcc || dayDate || '')}"
                    onchange="saveField(${idx},'fechaAcc',this.value)">
           </td>
@@ -633,21 +852,20 @@
 
   function renderFinalizados(){
     if(!finalizados.length){
-      tbFinal.innerHTML = `<tr><td colspan="4" style="text-align:left; color:#64748b;">Sin días finalizados.</td></tr>`;
+      tbFinal.innerHTML = <tr><td colspan="4" style="text-align:left; color:#64748b;">Sin días finalizados.</td></tr>;
       return;
     }
 
-    tbFinal.innerHTML = finalizados.map((d,i)=>{
-      const estado = "OK";
+    tbFinal.innerHTML = finalizados.map((d, i) => {
       const btnEditar = d.locked
-        ? `<button class="mini" disabled>Editar</button>`
-        : `<button class="mini" onclick="cargarDia(${i})">Editar</button>`;
+        ? <button class="mini" disabled>Editar</button>
+        : <button class="mini" onclick="cargarDia(${i})">Editar</button>;
 
       return `
         <tr>
           <td><b>${esc(d.fecha)}</b></td>
           <td>${(d.datos||[]).length}</td>
-          <td>${esc(estado)}</td>
+          <td>OK</td>
           <td class="left">
             ${btnEditar}
             <button class="mini" onclick="pdfDia(${i})">PDF</button>
@@ -663,10 +881,15 @@
     renderAcciones();
   }
 
-  // ====== FINALIZAR / DIAS ======
   function finalizarDia(){
-    if(!data.length){ alert("No hay registros."); return; }
-    if(!dayDate){ alert("Falta la fecha del día."); return; }
+    if(!data.length){
+      alert("No hay registros.");
+      return;
+    }
+    if(!dayDate){
+      alert("Falta la fecha del día.");
+      return;
+    }
 
     const snap = {
       fecha: dayDate,
@@ -675,7 +898,7 @@
       datos: JSON.parse(JSON.stringify(data))
     };
 
-    finalizados = finalizados.filter(x=>x.fecha !== dayDate);
+    finalizados = finalizados.filter(x => x.fecha !== dayDate);
     finalizados.unshift(snap);
     saveFinal();
     alert("Día guardado ✅");
@@ -684,7 +907,11 @@
 
   window.cargarDia = function(i){
     if(!finalizados[i]) return;
-    if(finalizados[i].locked){ alert("No editable."); return; }
+    if(finalizados[i].locked){
+      alert("No editable.");
+      return;
+    }
+
     data = JSON.parse(JSON.stringify(finalizados[i].datos || []));
     dayDate = finalizados[i].fecha || todayISO();
     inpDayDate.value = dayDate;
@@ -714,36 +941,46 @@
     dayDate = prevDate;
   };
 
-  // ====== PRINT HEADERS ======
   function headerPrintHTML(){
     return `
       <div class="encabezado-print">
-        <table><tr>
-          <td class="logo"><img src="logo.jpg" onerror="this.onerror=null;this.src='logo.png';" alt="Logo"></td>
-          <td class="titulo">
-            <strong>SISTEMA DE GESTIÓN DE CALIDAD</strong><br>
-            INSPECCIÓN DE CARCASAS ANTES DEL LAVADO<br>
-            <span style="font-weight:900; color:#0b3d91;">PCC 1 FAENA</span>
-          </td>
-          <td class="info">RG-HCCP - PCC - 307/1<br>Emisión: 23/02/2026<br>Rev. 12</td>
-        </tr></table>
+        <table>
+          <tr>
+            <td class="logo"><img src="logo.jpg" onerror="this.onerror=null;this.src='logo.png';" alt="Logo"></td>
+            <td class="titulo">
+              <strong>SISTEMA DE GESTIÓN DE CALIDAD</strong><br>
+              INSPECCIÓN DE CARCASAS ANTES DEL LAVADO<br>
+              <span style="font-weight:900; color:#0b3d91;">PCC 1 FAENA</span>
+            </td>
+            <td class="info">
+              RG-HCCP - PCC - 307/1<br>
+              Emisión: 23/02/2026<br>
+              Rev. 12
+            </td>
+          </tr>
+        </table>
       </div>
     `;
   }
 
-  // ✅ Encabezado especial SOLO para ACCIONES (PDF)
   function headerPrintAccionesHTML(){
     return `
       <div class="encabezado-print">
-        <table><tr>
-          <td class="logo"><img src="logo.jpg" onerror="this.onerror=null;this.src='logo.png';" alt="Logo"></td>
-          <td class="titulo">
-            <strong>SISTEMA DE GESTIÓN DE CALIDAD</strong><br>
-            DESCRIPCIÓN DEL DESVÍO<br>
-            <span style="font-weight:900; color:#0b3d91;">HACCP - PCC1 FAENA</span>
-          </td>
-          <td class="info">RG-HCCP - PCC - 307/1<br>Emisión: 23/02/2026<br>Rev. 12</td>
-        </tr></table>
+        <table>
+          <tr>
+            <td class="logo"><img src="logo.jpg" onerror="this.onerror=null;this.src='logo.png';" alt="Logo"></td>
+            <td class="titulo">
+              <strong>SISTEMA DE GESTIÓN DE CALIDAD</strong><br>
+              DESCRIPCIÓN DEL DESVÍO<br>
+              <span style="font-weight:900; color:#0b3d91;">HACCP - PCC1 FAENA</span>
+            </td>
+            <td class="info">
+              RG-HCCP - PCC - 307/1<br>
+              Emisión: 23/02/2026<br>
+              Rev. 12
+            </td>
+          </tr>
+        </table>
       </div>
     `;
   }
@@ -752,26 +989,40 @@
     const fecha = new Date().toLocaleDateString("es-AR");
     return `
       <div class="p-firmas">
-        <div class="p-firma-box"><div><b>Analista</b></div><div class="p-line"></div><div class="p-small">Aclaración:</div></div>
-        <div class="p-firma-box"><div><b>Verificador</b></div><div class="p-line"></div><div class="p-small">Aclaración:</div></div>
+        <div class="p-firma-box">
+          <div><b>Analista</b></div>
+          <div class="p-line"></div>
+          <div class="p-small">Aclaración:</div>
+        </div>
+        <div class="p-firma-box">
+          <div><b>Verificador</b></div>
+          <div class="p-line"></div>
+          <div class="p-small">Aclaración:</div>
+        </div>
       </div>
       <div class="p-right p-small" style="margin-top:8px;"><b>Fecha impresión:</b> ${esc(fecha)}</div>
     `;
   }
 
   function imprimirTodo(){
-    let html = '<div class="print-page">';
+    let html = "";
 
     // REGISTRO
+    html += <div class="print-section">;
     html += headerPrintHTML();
-    html += `<div class="p-title">REGISTRO PCC 1 - ${esc(dayDate || "")}</div>`;
+    html += <div class="p-title">REGISTRO PCC 1 - ${esc(dayDate || "")}</div>;
     html += `
       <table class="p-table">
         <thead>
-          <tr><th>Garrón</th><th>Hora</th><th>0/1</th><th>Resp</th></tr>
+          <tr>
+            <th>Garrón</th>
+            <th>Hora</th>
+            <th>0/1</th>
+            <th>Resp</th>
+          </tr>
         </thead>
         <tbody>
-          ${data.map(d=>`
+          ${data.map(d => `
             <tr>
               <td>${esc(d.g)}</td>
               <td>${esc(d.h)}</td>
@@ -782,13 +1033,14 @@
         </tbody>
       </table>
     `;
+    html += firmasHTML();
+    html += </div>;
 
     // ACCIONES
-    const devs = data.filter(d=>d.b==="1");
-
-    // ✅ Encabezado especial para acciones
+    const devs = data.filter(d => d.b === "1");
+    html += <div class="print-section">;
     html += headerPrintAccionesHTML();
-    html += `<div class="p-title">DESCRIPCIÓN DEL DESVÍO</div>`;
+    html += <div class="p-title">DESCRIPCIÓN DEL DESVÍO</div>;
     html += `
       <table class="p-table">
         <thead>
@@ -807,7 +1059,7 @@
           </tr>
         </thead>
         <tbody>
-          ${devs.map(d=>`
+          ${devs.map(d => `
             <tr>
               <td>${esc(d.g)}</td>
               <td>${esc(d.lado)}</td>
@@ -825,15 +1077,30 @@
         </tbody>
       </table>
     `;
-
     html += firmasHTML();
-    html += '</div>';
+    html += </div>;
 
     document.getElementById("print-replica").innerHTML = html;
-    setTimeout(()=>window.print(), 200);
+    setTimeout(() => window.print(), 200);
   }
 
-  // ====== INIT ======
+  // Tabs + mostrar firmas solo en registro
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", function(){
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+
+      this.classList.add("active");
+      const tab = this.getAttribute("data-tab");
+      document.getElementById(tab).classList.add("active");
+
+      firmasBox.style.display = (tab === "tab1") ? "block" : "none";
+
+      if(tab === "tab3") renderFinalizados();
+    });
+  });
+
+  // init
   loadAll();
   capTime();
   updateGarron();
