@@ -237,6 +237,7 @@
             <th>Descripción del desvío</th>
             <th>Acción correctiva</th>
             <th>Restablecimiento del control</th>
+            <th>Acción preventiva</th>
             <th style="width:140px;">Encargado</th>
           </tr>
         </thead>
@@ -459,6 +460,7 @@
       nc:"",
       ac:"",
       ap:"",
+      prev:"",
       enc:""
     });
 
@@ -561,7 +563,7 @@
     const devs = data.map((d,idx)=>({d,idx})).filter(x=>x.d.b==="1");
 
     if(devs.length === 0){
-      tbAcc.innerHTML = `<tr><td colspan="7" style="text-align:left;color:#64748b;">Sin desvíos (1).</td></tr>`;
+      tbAcc.innerHTML = `<tr><td colspan="8" style="text-align:left;color:#64748b;">Sin desvíos (1).</td></tr>`;
       return;
     }
 
@@ -612,6 +614,15 @@
               <option value="Se deberá asegurar que la carcasa en cuestión está libre de contaminación, como su compañera."
                 ${d.ap==="Se deberá asegurar que la carcasa en cuestión está libre de contaminación, como su compañera."?"selected":""}>
                 Se deberá asegurar que la carcasa en cuestión está libre de contaminación, como su compañera.
+              </option>
+            </select>
+          </td>
+          <td>
+            <select ${dis} onchange="saveField(${idx},'prev',this.value)">
+              <option value="">Seleccione</option>
+              <option value="Realizada en conjunto por el responsable de faena y Gerente de Control de Calidad. Se analiza el contaminante encontrado, se detecta el origen y de que etapa del proceso proviene. Luego se capacita al personal que se ha detectado la falla en el proceso y al personal que está realizando el monitoreo."
+                ${d.prev==="Realizada en conjunto por el responsable de faena y Gerente de Control de Calidad. Se analiza el contaminante encontrado, se detecta el origen y de que etapa del proceso proviene. Luego se capacita al personal que se ha detectado la falla en el proceso y al personal que está realizando el monitoreo."?"selected":""}>
+                Realizada en conjunto por el responsable de faena y Gerente de Control de Calidad. Se analiza el contaminante encontrado, se detecta el origen y de que etapa del proceso proviene. Luego se capacita al personal que se ha detectado la falla en el proceso y al personal que está realizando el monitoreo.
               </option>
             </select>
           </td>
@@ -775,7 +786,7 @@
       <table class="p-table" style="margin-top:14px;">
         <thead>
           <tr>
-            <th colspan="9">
+            <th colspan="10">
               ${headerPrintHTML()}
               <div class="p-title">ACCIONES</div>
             </th>
@@ -789,6 +800,7 @@
             <th>Descripción del desvío</th>
             <th>Acción correctiva</th>
             <th>Restablecimiento del control</th>
+            <th>Acción preventiva</th>
             <th>Encargado</th>
           </tr>
         </thead>
@@ -803,6 +815,7 @@
               <td>${esc(d.descDesvio)}</td>
               <td>${esc(d.ac)}</td>
               <td>${esc(d.ap)}</td>
+              <td>${esc(d.prev)}</td>
               <td>${esc(d.enc)}</td>
             </tr>
           `).join("")}
