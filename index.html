@@ -145,7 +145,7 @@
         </td>
         <td class="info">
           RG-HCCP - PCC - 307/1<br>
-          Emisión: 16/03/2026<br>
+          Emisión: 23/02/2026<br>
           Rev. 12
         </td>
       </tr>
@@ -172,7 +172,7 @@
 
     <div class="row">
       <label>HORA</label>
-      <input type="time" id="inH" step="60" lang="es-AR">
+      <input type="time" id="inH" step="60">
       <div class="switchline">
         <input type="checkbox" id="lockMode" title=" ">
       </div>
@@ -233,10 +233,9 @@
             <th style="width:90px;">Hora</th>
             <th style="width:130px;">Fecha</th>
             <th>Descripción del desvío</th>
+            <th>No conformidad</th>
             <th>Acción correctiva</th>
-            <th>Hora/corregido SI/NO disposicion del producto</th>
-            <th>Restablecimiento de control de proceso</th>
-            <th>Accion preventiva</th>
+            <th>Acción preventiva</th>
             <th style="width:140px;">Encargado</th>
           </tr>
         </thead>
@@ -456,9 +455,8 @@
       ubicacion:"",
       fechaDesvio:"",
       descDesvio:"",
+      nc:"",
       ac:"",
-      corregido:"",
-      restablecimiento:"",
       ap:"",
       enc:""
     });
@@ -558,7 +556,7 @@
     }).join("");
   }
 
-function renderAcciones(){
+  function renderAcciones(){
     const devs = data.map((d,idx)=>({d,idx})).filter(x=>x.d.b==="1");
 
     if(devs.length === 0){
@@ -598,18 +596,10 @@ function renderAcciones(){
           <td>${esc(d.h || "")}</td>
           <td><input type="date" ${dis} value="${escAttr(d.fechaDesvio)}" onchange="saveField(${idx},'fechaDesvio',this.value)"></td>
           <td><textarea ${dis} oninput="saveField(${idx},'descDesvio',this.value)">${esc(d.descDesvio)}</textarea></td>
+          <td><textarea ${dis} oninput="saveField(${idx},'nc',this.value)">${esc(d.nc)}</textarea></td>
           <td><textarea ${dis} oninput="saveField(${idx},'ac',this.value)">${esc(d.ac)}</textarea></td>
-          <td><textarea ${dis} oninput="saveField(${idx},'corregido',this.value)">${esc(d.corregido)}</textarea></td>
-          <td><textarea ${dis} oninput="saveField(${idx},'restablecimiento',this.value)">${esc(d.restablecimiento)}</textarea></td>
           <td><textarea ${dis} oninput="saveField(${idx},'ap',this.value)">${esc(d.ap)}</textarea></td>
-          <td>
-          <select onchange="saveField(${idx},'enc',this.value)">
-          <option value="">Encargado</option>
-          <option value="Agustin Bravo" ${d.enc==="Agustin Bravo"?"selected":""}>Agustin Bravo</option>
-          <option value="Juan Alegre" ${d.enc==="Juan Alegre"?"selected":""}>Juan Alegre</option>
-          <option value="Carlos Esquivel" ${d.enc==="Carlos Esquivel"?"selected":""}>Carlos Esquivel</option>
-</select>
-</td>
+          <td><input ${dis} value="${escAttr(d.enc)}" oninput="saveField(${idx},'enc',this.value)"></td>
         </tr>
       `;
     }).join("");
@@ -707,7 +697,7 @@ function renderAcciones(){
           <td class="logo"><img src="logo.jpg" onerror="this.onerror=null;this.src='logo.png';" alt="Logo"></td>
           <td class="titulo"><strong>SISTEMA DE GESTIÓN DE CALIDAD</strong><br>INSPECCIÓN DE CARCASAS ANTES DEL LAVADO<br>
           <span style="font-weight:900; color:#0b3d91;">PCC 1 FAENA</span></td>
-          <td class="info">RG-HCCP - PCC - 307/1<br>Emisión: 16/03/2026<br>Rev. 12</td>
+          <td class="info">RG-HCCP - PCC - 307/1<br>Emisión: 23/02/2026<br>Rev. 12</td>
         </tr></table>
       </div>
     `;
@@ -746,25 +736,17 @@ function renderAcciones(){
           <tr>
             <th>Garrón</th><th>Lado</th><th>Ubicación</th><th>Hora</th>
             <th>Fecha</th><th>Descripción del desvío</th>
-            <th>Accion correctiva</th><th>Hora corregido SI/NO disposicion del producto</th><th>Restablecimiento de control del proceso</th><th>Acción preventiva</th><th>Encargado</th>    
+            <th>No conformidad</th><th>Acción correctiva</th><th>Acción preventiva</th><th>Encargado</th>
           </tr>
         </thead>
         <tbody>
-          ${devs.map(d => `
-        <tr>
-          <td>${esc(d.g)}</td>
-          <td>${esc(d.lado)}</td>
-          <td>${esc(d.ubicacion)}</td>
-          <td>${esc(d.h)}</td>
-          <td>${esc(d.fechaDesvio)}</td>
-          <td>${esc(d.descDesvio)}</td>
-          <td>${esc(d.ac)}</td>
-          <td>${esc(d.corregido)}</td>
-          <td>${esc(d.restablecimiento)}</td>
-          <td>${esc(d.ap)}</td>
-          <td>${esc(d.enc)}</td>
-        </tr>
-      `).join("")}
+          ${devs.map(d=>`
+            <tr>
+              <td>${esc(d.g)}</td><td>${esc(d.lado)}</td><td>${esc(d.ubicacion)}</td><td>${esc(d.h)}</td>
+              <td>${esc(d.fechaDesvio)}</td><td>${esc(d.descDesvio)}</td><td>${esc(d.nc)}</td>
+              <td>${esc(d.ac)}</td><td>${esc(d.ap)}</td><td>${esc(d.enc)}</td>
+            </tr>
+          `).join("")}
         </tbody>
       </table>
     `;
