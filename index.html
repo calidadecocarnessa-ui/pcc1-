@@ -92,6 +92,8 @@
 
     #print-replica{ display:none; }
     @media print{
+      thead { display: table-header-group; }
+      tfoot { display: table-footer-group; }
       .tabs, .toolbar, .card-entry, .table-container { display:none !important; }
       #print-replica{ display:block !important; }
       body > .encabezado{ display:none !important; }
@@ -233,9 +235,8 @@
             <th style="width:90px;">Hora</th>
             <th style="width:130px;">Fecha</th>
             <th>Descripción del desvío</th>
-            <th>No conformidad</th>
             <th>Acción correctiva</th>
-            <th>Acción preventiva</th>
+            <th>Restablecimiento del control</th>
             <th style="width:140px;">Encargado</th>
           </tr>
         </thead>
@@ -560,7 +561,7 @@
     const devs = data.map((d,idx)=>({d,idx})).filter(x=>x.d.b==="1");
 
     if(devs.length === 0){
-      tbAcc.innerHTML = `<tr><td colspan="8" style="text-align:left;color:#64748b;">Sin desvíos (1).</td></tr>`;
+      tbAcc.innerHTML = `<tr><td colspan="7" style="text-align:left;color:#64748b;">Sin desvíos (1).</td></tr>`;
       return;
     }
 
@@ -596,10 +597,32 @@
           <td>${esc(d.h || "")}</td>
           <td><input type="date" ${dis} value="${escAttr(d.fechaDesvio)}" onchange="saveField(${idx},'fechaDesvio',this.value)"></td>
           <td><textarea ${dis} oninput="saveField(${idx},'descDesvio',this.value)">${esc(d.descDesvio)}</textarea></td>
-          <td><textarea ${dis} oninput="saveField(${idx},'nc',this.value)">${esc(d.nc)}</textarea></td>
-          <td><textarea ${dis} oninput="saveField(${idx},'ac',this.value)">${esc(d.ac)}</textarea></td>
-          <td><textarea ${dis} oninput="saveField(${idx},'ap',this.value)">${esc(d.ap)}</textarea></td>
-          <td><input ${dis} value="${escAttr(d.enc)}" oninput="saveField(${idx},'enc',this.value)"></td>
+          <td>
+            <select ${dis} onchange="saveField(${idx},'ac',this.value)">
+              <option value="">Seleccione</option>
+              <option value="Operario responsable capacitado extrae a cuchillo el área afectada, abarcando un área mayor a la afectada. Terminada la corrección, se procede a la aspersión con rociador manual con una solución de cloro con una concentración de 3 ppm en las áreas afectadas."
+                ${d.ac==="Operario responsable capacitado extrae a cuchillo el área afectada, abarcando un área mayor a la afectada. Terminada la corrección, se procede a la aspersión con rociador manual con una solución de cloro con una concentración de 3 ppm en las áreas afectadas."?"selected":""}>
+                Operario responsable capacitado extrae a cuchillo el área afectada, abarcando un área mayor a la afectada. Terminada la corrección, se procede a la aspersión con rociador manual con una solución de cloro con una concentración de 3 ppm en las áreas afectadas.
+              </option>
+            </select>
+          </td>
+          <td>
+            <select ${dis} onchange="saveField(${idx},'ap',this.value)">
+              <option value="">Seleccione</option>
+              <option value="Se deberá asegurar que la carcasa en cuestión está libre de contaminación, como su compañera."
+                ${d.ap==="Se deberá asegurar que la carcasa en cuestión está libre de contaminación, como su compañera."?"selected":""}>
+                Se deberá asegurar que la carcasa en cuestión está libre de contaminación, como su compañera.
+              </option>
+            </select>
+          </td>
+          <td>
+            <select ${dis} onchange="saveField(${idx},'enc',this.value)">
+              <option value="">Seleccione</option>
+              <option value="Agustin Bravo" ${d.enc==="Agustin Bravo"?"selected":""}>Agustin Bravo</option>
+              <option value="Juan Alegre" ${d.enc==="Juan Alegre"?"selected":""}>Juan Alegre</option>
+              <option value="Carlos Esquivel" ${d.enc==="Carlos Esquivel"?"selected":""}>Carlos Esquivel</option>
+            </select>
+          </td>
         </tr>
       `;
     }).join("");
@@ -716,35 +739,71 @@
 
   function imprimirTodo(){
     let html = '<div class="print-page">';
-    html += headerPrintHTML();
-    html += `<div class="p-title">REGISTRO PCC 1 - ${esc(dayDate || "")}</div>`;
+
     html += `
       <table class="p-table">
-        <thead><tr><th>Garrón</th><th>Hora</th><th>0/1</th><th>Resp</th></tr></thead>
+        <thead>
+          <tr>
+            <th colspan="4">
+              ${headerPrintHTML()}
+              <div class="p-title">REGISTRO PCC 1 - ${esc(dayDate || "")}</div>
+            </th>
+          </tr>
+          <tr>
+            <th>Garrón</th>
+            <th>Hora</th>
+            <th>0/1</th>
+            <th>Resp</th>
+          </tr>
+        </thead>
         <tbody>
-          ${data.map(d=>`<tr><td>${esc(d.g)}</td><td>${esc(d.h)}</td><td>${esc(d.b)}</td><td>${esc(d.r)}</td></tr>`).join("")}
+          ${data.map(d=>`
+            <tr>
+              <td>${esc(d.g)}</td>
+              <td>${esc(d.h)}</td>
+              <td>${esc(d.b)}</td>
+              <td>${esc(d.r)}</td>
+            </tr>
+          `).join("")}
         </tbody>
       </table>
     `;
 
     const devs = data.filter(d=>d.b==="1");
-    html += headerPrintHTML();
-    html += `<div class="p-title">ACCIONES</div>`;
+
     html += `
-      <table class="p-table">
+      <table class="p-table" style="margin-top:14px;">
         <thead>
           <tr>
-            <th>Garrón</th><th>Lado</th><th>Ubicación</th><th>Hora</th>
-            <th>Fecha</th><th>Descripción del desvío</th>
-            <th>No conformidad</th><th>Acción correctiva</th><th>Acción preventiva</th><th>Encargado</th>
+            <th colspan="9">
+              ${headerPrintHTML()}
+              <div class="p-title">ACCIONES</div>
+            </th>
+          </tr>
+          <tr>
+            <th>Garrón</th>
+            <th>Lado</th>
+            <th>Ubicación</th>
+            <th>Hora</th>
+            <th>Fecha</th>
+            <th>Descripción del desvío</th>
+            <th>Acción correctiva</th>
+            <th>Restablecimiento del control</th>
+            <th>Encargado</th>
           </tr>
         </thead>
         <tbody>
           ${devs.map(d=>`
             <tr>
-              <td>${esc(d.g)}</td><td>${esc(d.lado)}</td><td>${esc(d.ubicacion)}</td><td>${esc(d.h)}</td>
-              <td>${esc(d.fechaDesvio)}</td><td>${esc(d.descDesvio)}</td><td>${esc(d.nc)}</td>
-              <td>${esc(d.ac)}</td><td>${esc(d.ap)}</td><td>${esc(d.enc)}</td>
+              <td>${esc(d.g)}</td>
+              <td>${esc(d.lado)}</td>
+              <td>${esc(d.ubicacion)}</td>
+              <td>${esc(d.h)}</td>
+              <td>${esc(d.fechaDesvio)}</td>
+              <td>${esc(d.descDesvio)}</td>
+              <td>${esc(d.ac)}</td>
+              <td>${esc(d.ap)}</td>
+              <td>${esc(d.enc)}</td>
             </tr>
           `).join("")}
         </tbody>
